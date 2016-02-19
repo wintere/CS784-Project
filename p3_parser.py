@@ -12,7 +12,7 @@ if len(sys.argv) != 2:
 
 # fetch page and split into tuples
 fp = sys.argv[1]
-fd = open(fp, "r")
+fd = open(fp, mode="r", encoding="latin-1")
 
 # tuple structure
 # pair1ID-pair2ID#source?pair1ID?{pair1.json}?pair2ID{pair2.json}match
