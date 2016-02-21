@@ -12,7 +12,7 @@ if len(sys.argv) != 2:
 
 # fetch page and split into tuples
 fp = sys.argv[1]
-fd = open(fp, mode="r", encoding="latin-1")
+fd = open(fp, mode='r', encoding='utf-8', errors='replace')
 
 # tuple structure
 # pair1ID-pair2ID#source?pair1ID?{pair1.json}?pair2ID{pair2.json}match
@@ -32,6 +32,7 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 attribute_list = defaultdict(int)
 
 # for each line (pair of tuples) in the file
+lc = 0
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
@@ -60,10 +61,9 @@ for line in fd:
         print("invalid json string" + pair2_id)
 
     # TODO move data to appropriate structure, identify outlier tuples
-
 fd.close()
 
-# preliminary overview: attribute list sorted by frequency (at most 40,000 as attributes differ b/w tuples)
+# # preliminary overview: attribute list sorted by frequency (at most 40,000 as attributes differ b/w tuples)
 # for k in sorted(attribute_list.items(), key=lambda t: t[1], reverse=True):
 #    print(k[0] + " (" + str(k[1]) + ")")
 
@@ -78,22 +78,26 @@ for attribute in sorted(attribute_list.items(), key=lambda t: t[1], reverse=True
     
 
 # Iterate through all the tuples in the file again. Output the top 10 attributes.
-fd = open(fp, mode="r", encoding="latin-1")
+fd = open(fp, mode="r")
 for line in fd:
     # Split lines and parse the json
     seg = re.split(jumbo_pattern, line)
     pair1_json = seg[4]
+    pair2_json = seg[8]
 
     # json loads returns a dictionary
     try:
-        tuple = json.loads(pair1_json)
+        tuple1 = json.loads(pair1_json)
+        tuple2 = json.loads(pair2_json)
     except ValueError:
         print("invalid json string" + id_string)
-        
+
     for attribute in top10_attributes:
-        if attribute in tuple:
-            print(attribute + ": " + tuple[attribute][0])
-    
-    print("\n\n")
+        if attribute in tuple1:
+            print(attribute + ": " + str(tuple1[attribute]))
+        if attribute in tuple2:
+             print(attribute + ": " + str(tuple2[attribute]))
+
+    print("\n")
 
 fd.close()
