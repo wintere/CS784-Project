@@ -83,6 +83,7 @@ with open('stage2_development_set.csv', 'r') as development_set_csv_file:
                 true_positive += 1
             elif label != '':
                 print("WRONG BRAND")
+                false_positive += 1
             else:
                 print("FALSE POS")
                 false_positive += 1
