@@ -46,7 +46,7 @@ with open('stage2_development_set.csv', 'r') as development_set_csv_file:
         for substring in s_array:
             #preprocess title?
             #tweak as necessary
-            cand = brand_trie.prefixes(substring.title())
+            cand = brand_trie.prefixes(substring)
             final_cands = set()
             for c in cand:
                 sub = False
