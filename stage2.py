@@ -37,6 +37,7 @@ with open('stage2_development_set.csv', 'r') as development_set_csv_file:
     for product in development_set_reader:
         # First attempt: split the product name into an array of strings.
         product_name = product[0].upper()
+        product_name = re.sub(r'\|\(\)',' ', product_name)
         substrings = product_name.split(' ')
         s_array = []
         for i in range(len(substrings) - 1):
@@ -53,6 +54,8 @@ with open('stage2_development_set.csv', 'r') as development_set_csv_file:
                 for st in substrings:
                     if (c in st) and (len(c) < len(st)):
                         sub = True
+                    if (c == st):
+                        break
                 if sub == False:
                     if c in syn_dict:
                         final_cands.add(syn_dict[c])
@@ -97,5 +100,5 @@ print("\n\n")
 print("True Pos",true_positive, "False Pos",false_positive, "True Neg",true_negative, "False Neg", false_negative)
 precision = float (true_positive)/(true_positive + false_positive)
 recall = float(true_positive)/(true_positive + false_negative)
-print (precision, recall)
+print ("Precision:",precision, "Recall:",recall)
 
