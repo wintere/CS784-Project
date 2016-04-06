@@ -8,18 +8,13 @@ from feature_operations import FeatureGenerator
 from sklearn import tree
 
 # # put the proper file path to the pairs source here
-if len(sys.argv) != 2:
-    print("Usage: python stage3_decision_tree.py <input filename>")
+if len(sys.argv) != 3:
+    print("Usage: python stage3_decision_tree.py <training data filename> <full dataset filename>")
     exit()
 
 # fetch page and split into tuples
-fp = sys.argv[1]
-fd = open(fp, mode='r')
-
-# tuple structure
-# pair1ID-pair2ID#source?pair1ID?{pair1.json}?pair2ID{pair2.json}match
-# pair1ID and pair2Id are strictly numeric, source can have dashes, periods (urls), or spaces (offline sources)
-# match is strictly ?MATCH OR ?MISMATCH
+training_fp = sys.argv[1]
+training_fd = open(training_fp, mode='r')
 
 # regular expressions to divide data into pairs of tuples: tested to pull out values on all 20,000 tuples
 id_pattern =r'\d+-\d+#[\w. -]+\?\d+\?'
@@ -28,12 +23,15 @@ match_pattern = r'\?MATCH|\?MISMATCH'
 
 # there might be a better way to do this than the split library...
 jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d+\?)'
-data = []
+training_samples = 0
+training_data = []
 labels = []
 
-# Now set up the training data
+
+# Set up the training data
+print("Setting up training data...");
 f = FeatureGenerator()
-for line in fd:
+for line in training_fd:
     # Split line into 3 important parts (tuple1, tuple2, label)
     seg = re.split(jumbo_pattern, line)
     pair1_json = seg[4]
@@ -46,25 +44,67 @@ for line in fd:
     ln = l['Product Name']
     rn = r['Product Name']
     if 'stress testing item' in ln[0].lower() or 'stress' in rn[0].lower():
-        print(False)
+        print("Skipped stress testing item.")
     else:
         v = f.getVector(l, r)
-        print(v, match_status)
-        
-    # Set up the label for these tuples
-    label = 1 if match_status == "?MATCH" else 0
+        #print(v, match_status)
+        # Now append the feature vector + label to our data structures
+        training_data.append(v)
+        labels.append(match_status)
+        training_samples += 1        
     
-    # Now append the feature vector + label to our data structures
-    data.append(v)
-    labels.append(label)
-fd.close()
+training_fd.close()
+print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
 clf = tree.DecisionTreeClassifier()
-clf = clf.fit(data, labels)
+clf = clf.fit(training_data, labels)
 
-# Run a couple of tests to see if this works
-test1 = clf.predict([[0.9701492537313433, 0.8125, 1.0]])
-test2 = clf.predict([[0.08860759493670886, 0.3888888888888889, 1.0]])
-print("Test 1 (should return 1): " + str(test1[0]))
-print("Test 2 (should return 0): " + str(test2[0]))
+# MC: The following code is mostly a copy of the first half, we should refactor.
+
+true_positives = 0
+false_positives = 0
+true_negatives = 0
+false_negatives = 0
+dataset_count = 0
+
+# Open the file with the full dataset
+dataset_fp = sys.argv[2]
+dataset_fd = open(dataset_fp, mode='r', encoding="latin-1")
+
+# Set up the training data
+print("Analyzing the full dataset...");
+for line in dataset_fd:
+    # Split line into 3 important parts (tuple1, tuple2, label)
+    seg = re.split(jumbo_pattern, line)
+    pair1_json = seg[4]
+    pair2_json = seg[8]
+    match_status = seg[9]
+    
+    # Set up the feature vector for these tuples
+    l = json.loads(pair1_json)
+    r = json.loads(pair2_json)
+    ln = l['Product Name']
+    rn = r['Product Name']
+    if 'stress testing item' in ln[0].lower() or 'stress' in rn[0].lower():
+        true_negatives += 1
+    else:
+        dataset_count += 1
+        v = f.getVector(l, r)
+        match_guess = clf.predict([v])
+        if match_guess == match_status:
+            true_positives += 1
+        elif match_guess != match_status:
+            false_positives += 1
+                 
+    
+dataset_fd.close()
+
+# Output some results
+precision_percent = true_positives * 100 / (true_positives + false_positives)
+
+print("Finished analyzing " + str(dataset_count) + " data records")
+print("True positives: " + str(true_positives))
+print("False positives: " + str(false_positives))
+print("Precision: " + str("%.2f" % precision_percent) + "%")
+
