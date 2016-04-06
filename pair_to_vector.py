@@ -5,16 +5,19 @@ import json
 import sys
 from collections import defaultdict
 import random
+import feature_operations
+from feature_operations import FeatureGenerator
 import csv
 
-# # put the proper file path to the pairs source here
-if len(sys.argv) != 3:
-    print("usage: <pointer to elec_pairs_stage1.txt file> <tuple csv name>")
+
+
+ # put the proper file path to the pairs source here
+if len(sys.argv) != 2:
+    print("usage: <pointer to stage3_L.txt file>")
     exit()
 
 # fetch page and split into tuples
 fp = sys.argv[1]
-output = sys.argv[2]
 fd = open(fp, mode='r', errors='replace')
 
 # tuple structure
@@ -31,13 +34,11 @@ match_pattern = r'\?MATCH|\?MISMATCH'
 jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d+\?)'
 
 
-# a simple attribute list for test purposes
-attribute_list = defaultdict(int)
-
 # for each line (pair of tuples) in the file
-lc = 0
 count = 0
 tuples = set()
+
+f = FeatureGenerator()
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
@@ -52,10 +53,19 @@ for line in fd:
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
     if count < 200:
-        print(id_string)
-    count += 1
+        l = json.loads(pair1_json)
+        r = json.loads(pair2_json)
+        ln = l['Product Name']
+        rn = r['Product Name']
+        if 'stress testing item' in ln[0].lower() or 'stress' in rn[0].lower():
+            print(False)
+        else:
+            v = f.getVector(l, r)
+            print(v, match_status)
+        tuples.add(tuple)
+        count += 1
+
 
 fd.close()
 
-for t in tuples:
-    print(t)
+#l and r are dictionaries
