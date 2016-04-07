@@ -27,8 +27,15 @@ class FeatureGenerator:
         p2_tokens = py_stringmatching.tokenizers.whitespace(p2)
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+    def product_name_tfidf(self,d1, d2):
+        p1 = d1.get('Product Name')[0]
+        p2 = d2.get('Product Name')[0]
+        p1_tokens = py_stringmatching.tokenizers.whitespace(p1)
+        p2_tokens = py_stringmatching.tokenizers.whitespace(p2)
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
-    def product_short_description_jaccard(self, d1, d2):
+
+    def product_short_description_tfidf(self, d1, d2):
         p1_tokens = []
         p2_tokens = []
         p1 = d1.get('Product Short Description')
@@ -37,7 +44,8 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+
 
 
     def product_long_description_tfidf(self,d1, d2):
@@ -66,9 +74,7 @@ class FeatureGenerator:
             p2 = p2[0]
             if p2 in self.syn_dict:
                 p2 = self.syn_dict[p2]
-        p1_tokens = py_stringmatching.tokenizers.whitespace(p1)
-        p2_tokens = py_stringmatching.tokenizers.whitespace(p2)
-        return py_stringmatching.simfunctions.monge_elkan(p1_tokens, p2_tokens)
+        return py_stringmatching.simfunctions.jaro_winkler(p1, p2)
 
     def category_match(self, d1, d2):
         d1_cat = set()
@@ -105,7 +111,7 @@ class FeatureGenerator:
 
     def getVector(self, d1, d2):
         vector = []
-        for func in self.product_long_description_tfidf, self.product_name_jaccard, self.brand_name_sim, self.color_match, self.product_short_description_jaccard, self.category_match:
+        for func in self.product_long_description_tfidf, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.category_match:
             x = func(d1, d2)
             vector.append(x)
         return vector
