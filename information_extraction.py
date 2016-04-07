@@ -10,9 +10,11 @@ from collections import defaultdict
 class InformationExtractor:
 
     def __init__(self):
+
+        #initialize brand trie
         brand_trie = datrie.Trie(string.printable)
         syn_dict = dict()
-        with open('big_dict.csv', 'r', encoding="latin-1") as brand_dict_csv_file:
+        with open('big_dict.csv', 'r') as brand_dict_csv_file:
             brand_dict_reader = csv.reader(brand_dict_csv_file, delimiter=',', quotechar='"')
             for brand in brand_dict_reader:
                 b_name = brand[0]
@@ -31,6 +33,23 @@ class InformationExtractor:
                 brand_trie[b_name] = int(brand[1])
         self.brand_trie = brand_trie
         self.syn_dict = syn_dict
+
+        #color dict
+        self.colors = []
+        with open('colors.txt','r') as c_file:
+            for c in c_file.readlines():
+                self.colors.append(c.strip('\n'))
+
+
+    def color_from_name(self, product_name):
+        colors = []
+        product_name = product_name.lower()
+        product_name_list = product_name.split()
+        for i in product_name_list:
+            if i in self.colors:
+                if i not in colors:
+                    colors.append(i)
+        return colors
 
     def brand_from_string(self, product_name):
         product_name = product_name.upper()

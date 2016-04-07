@@ -50,19 +50,17 @@ for line in fd:
     pair2_json = seg[8]
     match_status = seg[9]
 
+
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
-    if count < 200:
-        l = json.loads(pair1_json)
-        r = json.loads(pair2_json)
-        ln = l['Product Name']
-        rn = r['Product Name']
-        if 'stress testing item' in ln[0].lower() or 'stress' in rn[0].lower():
-            print(False)
-        else:
+    if random.randint(0,100) == 3:
+        if count < 5:
+            l = json.loads(pair1_json)
+            r = json.loads(pair2_json)
+            ln = l['Product Name']
+            rn = r['Product Name']
             v = f.getVector(l, r)
             print(v, match_status)
-        tuples.add(tuple)
         count += 1
 
 
