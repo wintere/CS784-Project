@@ -51,32 +51,42 @@ for line in fd:
     parser = MyHtmlParser()
     pld = 'Product Long Description'
     try:
-        print("Tuple1")
         r = json.loads(pair1_json)
         for k in r.keys():
             attribute_list[k] += 1
-            print(k, ':', r[k][0])
+            # print(k, ':', r[k][0])
         if pld in r.keys():
+            parser.result = {}
             parser.feed(r[pld][0])
-        print("")
+            for parsedkey, parsedval in parser.result.items():
+                if parsedkey not in  r.keys():
+                    r[parsedkey] = [parsedval]
+        # print("")
     except ValueError:
         print("invalid json string" + id_string)
 
     try:
-        print("Tuple2")
         s = json.loads(pair2_json)
         for k in s.keys():
             attribute_list[k] += 1
-            print(k, ':', s[k][0])
+            # print(k, ':', s[k][0])
         if pld in s.keys():
+            parser.result = {}
             parser.feed(s[pld][0])
-        print("")
+            for parsedkey, parsedval in parser.result.items():
+                if parsedkey not in s.keys():
+                    s[parsedkey] = [parsedval]
+        # print("")
     except ValueError:
         print("invalid json string" + pair2_id)
 
+    print("Tuple1")
+    print(r)
+    print("Tuple2")
+    print(s)
     print(match_status)
     print("")
-    
+
     # TODO move data to appropriate structure, identify outlier tuples
 #print(attribute_list)
 fd.close()
