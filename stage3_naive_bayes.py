@@ -5,7 +5,7 @@ import json
 import sys
 from collections import defaultdict
 from feature_operations import FeatureGenerator
-from sklearn import tree
+from sklearn.naive_bayes import GaussianNB
 
 # # put the proper file path to the pairs source here
 if len(sys.argv) != 3:
@@ -57,7 +57,7 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = tree.DecisionTreeClassifier()
+clf = GaussianNB()
 clf = clf.fit(training_data, labels)
 
 # MC: The following code is mostly a copy of the first half, we should refactor.
