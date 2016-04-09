@@ -5,9 +5,8 @@ import json
 import sys
 from collections import defaultdict
 import random
-import feature_operations
 from feature_operations import FeatureGenerator
-import csv
+from html_parser import MyHtmlParser
 
 
 
@@ -38,6 +37,7 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 count = 0
 tuples = set()
 
+parser = MyHtmlParser()
 f = FeatureGenerator()
 for line in fd:
     # split line into 5 parts described above
@@ -57,8 +57,6 @@ for line in fd:
         if count < 5:
             l = json.loads(pair1_json)
             r = json.loads(pair2_json)
-            ln = l['Product Name']
-            rn = r['Product Name']
             v = f.getVector(l, r)
             print(v, match_status)
         count += 1

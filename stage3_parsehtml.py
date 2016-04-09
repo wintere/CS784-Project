@@ -33,6 +33,9 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 attribute_list = defaultdict(int)
 
 # for each line (pair of tuples) in the file
+pld = 'Product Long Description'
+parser = MyHtmlParser()
+count = 0
 lc = 0
 for line in fd:
     # split line into 5 parts described above
@@ -47,46 +50,26 @@ for line in fd:
 
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
-
-    parser = MyHtmlParser()
-    pld = 'Product Long Description'
     try:
         r = json.loads(pair1_json)
-        for k in r.keys():
-            attribute_list[k] += 1
-            # print(k, ':', r[k][0])
         if pld in r.keys():
             parser.result = {}
             parser.feed(r[pld][0])
-            for parsedkey, parsedval in parser.result.items():
-                if parsedkey not in  r.keys():
-                    r[parsedkey] = [parsedval]
         # print("")
     except ValueError:
         print("invalid json string" + id_string)
 
     try:
         s = json.loads(pair2_json)
-        for k in s.keys():
-            attribute_list[k] += 1
-            # print(k, ':', s[k][0])
         if pld in s.keys():
             parser.result = {}
             parser.feed(s[pld][0])
-            for parsedkey, parsedval in parser.result.items():
-                if parsedkey not in s.keys():
-                    s[parsedkey] = [parsedval]
         # print("")
     except ValueError:
         print("invalid json string" + pair2_id)
 
-    print("Tuple1")
-    print(r)
-    print("Tuple2")
-    print(s)
-    print(match_status)
-    print("")
+    count += 1
+    if count > 10:
+        break
 
-    # TODO move data to appropriate structure, identify outlier tuples
-#print(attribute_list)
 fd.close()
