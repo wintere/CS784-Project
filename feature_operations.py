@@ -58,6 +58,28 @@ class FeatureGenerator:
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        
+    def product_type_tfidf(self,d1, d2):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = d1.get('Product Type')
+        p2 = d2.get('Product Type')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        
+    def product_segment_tfidf(self,d1, d2):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = d1.get('Product Segment')
+        p2 = d2.get('Product Segment')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
     def brand_name_sim(self,d1, d2):
         p1 = d1.get('Brand')
@@ -111,7 +133,7 @@ class FeatureGenerator:
 
     def getVector(self, d1, d2):
         vector = []
-        for func in self.product_long_description_tfidf, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.category_match:
+        for func in self.product_long_description_tfidf, self.product_type_tfidf, self.product_segment_tfidf, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.category_match:
             x = func(d1, d2)
             vector.append(x)
         return vector
