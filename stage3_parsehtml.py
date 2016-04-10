@@ -73,8 +73,4 @@ for line in fd:
                     s[parsedkey] = [parsedval]
     except ValueError:
         print("invalid json string" + pair2_id)
-    # print(r)
-    # print(s)
-    # print("")
-
 fd.close()
