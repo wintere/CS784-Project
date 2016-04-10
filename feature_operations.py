@@ -110,21 +110,6 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
-    def big_text_tfidf(self, l, r):
-        p1_tokens = []
-        p2_tokens = []
-
-        p1_keys = l.keys()
-        p2_keys = r.keys()
-        for key in p1_keys:
-            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
-            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(l.get(key)[0]))
-        for key in p2_keys:
-            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
-            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(r.get(key)[0]))
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
-
-
     def brand_name_sim(self,l, r):
         p1 = l.get('Brand')
         p2 = r.get('Brand')
@@ -173,8 +158,18 @@ class FeatureGenerator:
             r_color = r_color.union(self.ie.color_from_name(r['Product Short Description'][0]))
         return py_stringmatching.simfunctions.jaccard(l_color, r_color)
 
-
-
+    def big_text_tfidf(self, l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1_keys = l.keys()
+        p2_keys = r.keys()
+        for key in p1_keys:
+            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
+            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(l.get(key)[0]))
+        for key in p2_keys:
+            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
+            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(r.get(key)[0]))
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
     def getVector(self, l, r):
         #initialize vector and empty lld and rld (left long descript, right long descript)
