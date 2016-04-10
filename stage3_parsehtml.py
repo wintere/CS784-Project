@@ -36,11 +36,11 @@ attribute_list = defaultdict(int)
 pld = 'Product Long Description'
 count = 0
 lc = 0
-parser = MyHtmlParser()
+
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
-    
+    parser = MyHtmlParser()
     # due to capturing groups we get more segments than we want
     id_string = seg[3]
     pair1_json = seg[4]
