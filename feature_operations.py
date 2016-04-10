@@ -68,6 +68,7 @@ class FeatureGenerator:
         r_keys.extend(rld_keys)
         return py_stringmatching.simfunctions.monge_elkan(l_keys, r_keys)
 
+
     def long_descript_key_sim(self, l, r, lld, rld):
         lld_keys = list(lld.keys())
         rld_keys = list(rld.keys())
@@ -108,6 +109,21 @@ class FeatureGenerator:
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+
+    def big_text_tfidf(self, l, r):
+        p1_tokens = []
+        p2_tokens = []
+
+        p1_keys = l.keys()
+        p2_keys = r.keys()
+        for key in p1_keys:
+            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
+            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(l.get(key)[0]))
+        for key in p2_keys:
+            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
+            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(r.get(key)[0]))
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+
 
     def brand_name_sim(self,l, r):
         p1 = l.get('Brand')
@@ -177,7 +193,7 @@ class FeatureGenerator:
             rld = self.parser.result
 
         # functions that do not take in long description dictionaries
-        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_type_tfidf, self.product_segment_tfidf, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.category_match:
+        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_type_tfidf, self.product_segment_tfidf, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.category_match, self.big_text_tfidf:
             x = func(l, r)
             vector.append(x)
 
