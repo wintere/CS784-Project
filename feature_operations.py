@@ -57,7 +57,17 @@ class FeatureGenerator:
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
-
+        
+    def product_short_description_jaccard(self, l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Product Short Description')
+        p2 = r.get('Product Short Description')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def total_key_similarity(self, l, r, lld, rld):
         l_keys = list(l.keys())
@@ -87,6 +97,17 @@ class FeatureGenerator:
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        
+    def product_long_description_jaccard(self, l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Product Long Description')
+        p2 = r.get('Product Long Description')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_type_tfidf(self,l, r):
         p1_tokens = []
@@ -98,6 +119,17 @@ class FeatureGenerator:
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        
+    def product_type_jaccard(self,l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Product Type')
+        p2 = r.get('Product Type')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_segment_tfidf(self,l, r):
         p1_tokens = []
@@ -109,6 +141,75 @@ class FeatureGenerator:
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        
+    def product_segment_jaccard(self,l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Product Segment')
+        p2 = r.get('Product Segment')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+        
+    def manufacturer_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Manufacturer')
+        p2 = r.get('Manufacturer')
+        
+        # If these fields don't exist in the main key-value set, then check the parsed Product Long Description data.
+        if p1 is None and 'Manufacturer' in lld.keys():
+            p1 = [lld.get('Manufacturer')]
+        if p2 is None and 'Manufacturer' in rld.keys():
+            p2 = [rld.get('Manufacturer')]
+        
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+        
+    def manufacturer_part_number_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Manufacturer Part Number')
+        p2 = r.get('Manufacturer Part Number')
+ 
+        # If these fields don't exist in the main key-value set, then check the parsed Product Long Description data.
+        if p1 is None and 'Manufacturer Part Number' in lld.keys():
+            p1 = [lld.get('Manufacturer Part Number')]
+        if p2 is None and 'Manufacturer Part Number' in rld.keys():
+            p2 = [rld.get('Manufacturer Part Number')]
+
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+        
+    def assembled_product_length_jaccard(self, l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Assembled Product Length')
+        p2 = r.get('Assembled Product Length')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+        
+    def assembled_product_width_jaccard(self, l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Assembled Product Width')
+        p2 = r.get('Assembled Product Width')
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def brand_name_sim(self,l, r):
         p1 = l.get('Brand')
@@ -188,12 +289,12 @@ class FeatureGenerator:
             rld = self.parser.result
 
         # functions that do not take in long description dictionaries
-        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_type_tfidf, self.product_segment_tfidf, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.category_match, self.big_text_tfidf:
+        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_long_description_jaccard, self.product_type_tfidf, self.product_type_jaccard, self.product_segment_tfidf, self.product_segment_jaccard, self.assembled_product_length_jaccard, self.assembled_product_width_jaccard, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.product_short_description_jaccard, self.category_match, self.big_text_tfidf:
             x = func(l, r)
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity:
+        for func in self.long_descript_key_sim, self.total_key_similarity, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard:
             y = func(l, r, lld, rld)
             vector.append(y)
 
