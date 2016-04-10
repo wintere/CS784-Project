@@ -285,6 +285,30 @@ class FeatureGenerator:
             p2_tokens.extend(py_stringmatching.tokenizers.whitespace(r.get(key)[0]))
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
+    def brand_and_brand_name_sim(self, l, r, lld, rld):
+        p1 = l.get('Brand')
+        p2 = r.get('Brand')
+        if p1 is None and 'Brand Name' in l.keys():
+            p1 = l.get('Brand Name')
+        if p2 is None and 'Brand Name' in r.keys():
+            p2 = r.get('Brand Name')
+        if p1 is None and 'Brand' in lld.keys():
+            p1 = lld.get('Brand')
+        if p2 is None and 'Brand' in rld.keys():
+            p2 = rld.get('Brand')
+        if p1 is None and 'Brand Name' in lld.keys():
+            p1 = lld.get('Brand Name')
+        if p2 is None and 'Brand Name' in rld.keys():
+            p2 = rld.get('Brand Name')
+        if p1 is None and p2 is None:
+            return 0.0
+        if p1 is None:
+            p1 = [""]
+        if p2 is None:
+            p2 = [""]
+        return py_stringmatching.simfunctions.jaro_winkler(p1[0].lower(), p2[0].lower())
+
+
     def getVector(self, l, r):
         #initialize vector and empty lld and rld (left long descript, right long descript)
         rld = {}
@@ -307,7 +331,7 @@ class FeatureGenerator:
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard:
+        for func in self.long_descript_key_sim, self.total_key_similarity, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.brand_and_brand_name_sim:
             y = func(l, r, lld, rld)
             vector.append(y)
 
