@@ -34,9 +34,9 @@ attribute_list = defaultdict(int)
 
 # for each line (pair of tuples) in the file
 pld = 'Product Long Description'
-parser = MyHtmlParser()
 count = 0
 lc = 0
+parser = MyHtmlParser()
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
@@ -48,6 +48,7 @@ for line in fd:
     pair2_json = seg[8]
     match_status = seg[9]
 
+
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
     try:
@@ -55,7 +56,9 @@ for line in fd:
         if pld in r.keys():
             parser.result = {}
             parser.feed(r[pld][0])
-        # print("")
+            for parsedkey, parsedval in parser.result.items():
+                if parsedkey not in  r.keys():
+                    r[parsedkey] = [parsedval]
     except ValueError:
         print("invalid json string" + id_string)
 
@@ -64,12 +67,14 @@ for line in fd:
         if pld in s.keys():
             parser.result = {}
             parser.feed(s[pld][0])
-        # print("")
+            for parsedkey, parsedval in parser.result.items():
+                if parsedkey not in  s.keys():
+                    s[parsedkey] = [parsedval]
     except ValueError:
         print("invalid json string" + pair2_id)
 
-    count += 1
-    if count > 10:
-        break
+    # count += 1
+    # if count > 10:
+    #     break
 
 fd.close()
