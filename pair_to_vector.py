@@ -39,10 +39,12 @@ tuples = set()
 
 # parser = MyHtmlParser()
 f = FeatureGenerator()
+parser = MyHtmlParser()
+
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
-    parser = MyHtmlParser()
+    parser.reset()
     # due to capturing groups we get more segments than we want
     id_string = seg[3]
     pair1_json = seg[4]
