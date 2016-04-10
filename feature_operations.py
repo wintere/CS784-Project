@@ -259,6 +259,19 @@ class FeatureGenerator:
             r_color = r_color.union(self.ie.color_from_name(r['Product Short Description'][0]))
         return py_stringmatching.simfunctions.jaccard(l_color, r_color)
 
+    def big_text_jaccard(self, l, r):
+        p1_tokens = []
+        p2_tokens = []
+        p1_keys = l.keys()
+        p2_keys = r.keys()
+        for key in p1_keys:
+            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
+            p1_tokens.extend(py_stringmatching.tokenizers.whitespace(l.get(key)[0]))
+        for key in p2_keys:
+            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
+            p2_tokens.extend(py_stringmatching.tokenizers.whitespace(r.get(key)[0]))
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
     def big_text_tfidf(self, l, r):
         p1_tokens = []
         p2_tokens = []
@@ -289,7 +302,7 @@ class FeatureGenerator:
             rld = self.parser.result
 
         # functions that do not take in long description dictionaries
-        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_long_description_jaccard, self.product_type_tfidf, self.product_type_jaccard, self.product_segment_tfidf, self.product_segment_jaccard, self.assembled_product_length_jaccard, self.assembled_product_width_jaccard, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.product_short_description_jaccard, self.category_match, self.big_text_tfidf:
+        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_long_description_jaccard, self.product_type_tfidf, self.product_type_jaccard, self.product_segment_tfidf, self.product_segment_jaccard, self.assembled_product_length_jaccard, self.assembled_product_width_jaccard, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.product_short_description_jaccard, self.category_match, self.big_text_tfidf, self.big_text_jaccard:
             x = func(l, r)
             vector.append(x)
 
