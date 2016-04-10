@@ -308,7 +308,7 @@ class FeatureGenerator:
 
 
         # functions that do not take in long description dictionaries
-        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_long_description_jaccard, self.product_type_tfidf, self.product_type_jaccard, self.product_segment_tfidf, self.product_segment_jaccard, self.assembled_product_length_jaccard, self.assembled_product_width_jaccard, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.product_short_description_jaccard, self.category_match, self.big_text_tfidf, self.big_text_jaccard:
+        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_long_description_jaccard, self.product_type_tfidf, self.product_type_jaccard, self.assembled_product_length_jaccard, self.assembled_product_width_jaccard, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.product_short_description_jaccard,self.big_text_tfidf, self.big_text_jaccard:
             x = func(l, r)
             vector.append(x)
 
