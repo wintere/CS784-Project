@@ -170,7 +170,7 @@ class FeatureGenerator:
         if pld in l.keys():
             self.parser.result = {}
             self.parser.feed(l[pld][0])
-            rld = self.parser.result
+            lld = self.parser.result
         if pld in r.keys():
             self.parser.result = {}
             self.parser.feed(r[pld][0])
