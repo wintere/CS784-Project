@@ -56,7 +56,7 @@ for line in training_fd:
 training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
-# Set up a decision tree classifier using the data passed in
+# Set up a logistic regression classifier using the data passed in
 clf = LogisticRegression()
 clf = clf.fit(training_data, labels)
 
@@ -84,27 +84,32 @@ for line in dataset_fd:
     # Set up the feature vector for these tuples
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
-    ln = l['Product Name']
-    rn = r['Product Name']
-    if 'stress testing item' in ln[0].lower() or 'stress' in rn[0].lower():
-        true_negatives += 1
-    else:
-        dataset_count += 1
-        v = f.getVector(l, r)
-        match_guess = clf.predict([v])
+    dataset_count += 1
+    v = f.getVector(l, r)
+    
+    # Predict the match status using our classifier
+    match_guess = clf.predict([v])
+    if match_guess == '?MATCH':
         if match_guess == match_status:
             true_positives += 1
-        elif match_guess != match_status:
+        else:
             false_positives += 1
-                 
+    else:
+        if match_guess == match_status:
+            true_negatives += 1
+        else:
+            false_negatives += 1
+
     
 dataset_fd.close()
-
-# Output some results
-precision_percent = true_positives * 100 / (true_positives + false_positives)
 
 print("Finished analyzing " + str(dataset_count) + " data records")
 print("True positives: " + str(true_positives))
 print("False positives: " + str(false_positives))
-print("Precision: " + str("%.2f" % precision_percent) + "%")
+print("True negatives: " + str(true_negatives))
+print("False negatives: " + str(false_negatives))
+
+precision = float (true_positives)/(true_positives + false_positives)
+recall = float(true_positives)/(true_positives + false_negatives)
+print ("Precision:",precision, "Recall:",recall)
 
