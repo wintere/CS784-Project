@@ -4,12 +4,14 @@ import py_stringmatching.tokenizers
 import py_stringmatching.simfunctions
 from information_extraction import InformationExtractor
 from html_parser import MyHtmlParser
+import re
 
 #Rules to nest in:
 #always return MISMATCH or FALSE if 'stress testing DO NOT BUY' in product name
 #as these are not real products
 
 pld = 'Product Long Description'
+psd = 'Product Short Description'
 
 #helper method
 def fetchSet(dict, key):
@@ -62,8 +64,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -76,8 +76,7 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -111,8 +110,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -125,8 +122,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -329,8 +324,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def weight_jaccard(self, l, r, lld, rld):
@@ -380,8 +373,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_series_jaccard(self, l, r, lld, rld):
@@ -397,8 +388,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def features_jaccard(self, l, r, lld, rld):
@@ -448,8 +437,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def screen_size_jaccard(self, l, r, lld, rld):
@@ -465,8 +452,7 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def green_compliant_jaccard(self, l, r, lld, rld):
@@ -494,13 +480,12 @@ class FeatureGenerator:
         if p1 is None and 'Type' in lld.keys():
             p1 = [lld.get('Type')]
         if p2 is None and 'Type' in rld.keys():
-            p2 = [rld.get('Type')]     
+            p2 = [rld.get('Type')]
+        reg = r'[ \|]'
         if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+            p1_tokens = re.split(reg, p1[0])
         if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
+            p2_tokens = re.split(reg, p2[0])
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def form_factor_jaccard(self, l, r, lld, rld):
@@ -516,8 +501,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def operating_system_jaccard(self, l, r, lld, rld):
@@ -572,8 +555,14 @@ class FeatureGenerator:
             p1 = [""]
         if p2 is None:
             p2 = [""]
-        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+        y = max(len(p1),len(p2))
+        if y > 0:
+            return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])/y
+        if p1 != "" or p2 != "":
+            return 1
+        return 0
 
+    #FIXED (remember edit distance is not automatically divided by length of string, hence it can be as large as the length of the string)
     def product_model_levenshtein(self, l, r, lld, rld):
         p1 = l.get('Product Model')
         p2 = r.get('Product Model')
@@ -585,8 +574,14 @@ class FeatureGenerator:
             p1 = [""]
         if p2 is None:
             p2 = [""]
-        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+        y = max(len(p1),len(p2))
+        if y > 0:
+            return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])/y
+        if p1 != "" or p2 != "":
+            return 1
+        return 0
 
+    # This only appears in 27 tuples it's probably not actually useful
     def processor_core_levenshtein(self, l, r, lld, rld):
         p1 = l.get('Processor Core')
         p2 = r.get('Processor Core')
@@ -598,23 +593,25 @@ class FeatureGenerator:
             p1 = [""]
         if p2 is None:
             p2 = [""]
-        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+        y = max(len(p1),len(p2))
+        if y > 0:
+            return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])/y
+        else:
+            return 0
 
-    def device_types_levenshtein(self, l, r, lld, rld):
-        p1 = l.get('Device Types')
-        p2 = r.get('Device Types')
-        if p1 is None and 'Device Types' in lld.keys():
-            p1 = [lld.get('Device Types')]
-        if p2 is None and 'Device Types' in rld.keys():
-            p2 = [rld.get('Device Types')]     
-        if p1 is None:
-            p1 = [""]
-        if p2 is None:
-            p2 = [""]
-        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+    def device_type_sim(self, l, r, lld, rld):
+        #SYNONYMS
+        dt = 'Device Type'
+        ds = 'Device Types'
+        p1 = set()
+        p2 = set()
+        p1 = p1.union(fetchSet(l, dt), fetchSet(lld, dt), fetchSet(l, ds), fetchSet(lld, ds))
+        p2 = p2.union(fetchSet(r, dt), fetchSet(rld, dt), fetchSet(r, ds), fetchSet(rld, ds))
+        r =  py_stringmatching.simfunctions.jaccard(p1, p2)
+        return r
+
 
     def getVector(self, l, r):
-        #initialize vector and empty lld and rld (left long descript, right long descript)
         rld = {}
         lld = {}
         vector = []
@@ -625,12 +622,18 @@ class FeatureGenerator:
             self.parser.result = {}
             self.parser.feed(l[pld][0])
             lld = self.parser.result
+            l[pld] = [self.ie.text_from_html(l[pld][0])]
         if pld in r.keys():
             self.parser.reset()
             self.parser.result = {}
             self.parser.feed(r[pld][0])
             rld = self.parser.result
+            r[pld] = [self.ie.text_from_html(r[pld][0])]
 
+        if psd in l:
+            l[psd] = [self.ie.text_from_html(l[psd][0])]
+        if psd in r:
+            r[psd] = [self.ie.text_from_html(r[psd][0])]
 
         # functions that do not take in long description dictionaries
         for func in self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_name_tfidf, self.big_text_jaccard, self.product_segment_jaccard:
@@ -638,7 +641,7 @@ class FeatureGenerator:
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard, self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard, self.green_compliant_jaccard, self.form_factor_jaccard, self.assembly_code_sim, self.model_levenshtein, self.green_indicator_sim, self.product_model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.device_types_levenshtein:
+        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard, self.assembled_product_width_sim, self.assembled_product_length_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.form_factor_jaccard, self.assembly_code_sim, self.model_levenshtein, self.product_model_levenshtein, self.operating_system_jaccard, self.device_type_sim:
             y = func(l, r, lld, rld)
             vector.append(y)
 
