@@ -37,12 +37,12 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 count = 0
 tuples = set()
 
+# parser = MyHtmlParser()
 f = FeatureGenerator()
 parser = MyHtmlParser()
 
 for line in fd:
     # split line into 5 parts described above
-<<<<<<< Updated upstream
     seg = re.split(jumbo_pattern, line)
     parser.reset()
     # due to capturing groups we get more segments than we want
@@ -61,23 +61,9 @@ for line in fd:
             r = json.loads(pair2_json)
             v = f.getVector(l, r)
             print(v, match_status)
-=======
-    if random.randint(0, 10) == 3:
-        seg = re.split(jumbo_pattern, line)
-        parser = MyHtmlParser()
-        # due to capturing groups we get more segments than we want
-        id_string = seg[3]
-        pair1_json = seg[4]
-        pair2_id = seg[6]
-        pair2_json = seg[8]
-        match_status = seg[9]
-
-        l = json.loads(pair1_json)
-        r = json.loads(pair2_json)
-        v = f.getVector(l, r)
-        print(l['Product Name'], r['Product Name'], v, match_status)
->>>>>>> Stashed changes
         count += 1
-    if count == 5:
-        break
+
+
+fd.close()
+
 #l and r are dictionaries
