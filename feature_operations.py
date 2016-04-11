@@ -503,6 +503,115 @@ class FeatureGenerator:
         #     return 0.0
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+    def form_factor_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Form Factor')
+        p2 = r.get('Form Factor')
+        if p1 is None and 'Form Factor' in lld.keys():
+            p1 = [lld.get('Form Factor')]
+        if p2 is None and 'Form Factor' in rld.keys():
+            p2 = [rld.get('Form Factor')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def operating_system_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Operating System')
+        p2 = r.get('Operating System')
+        if p1 is None and 'Operating System' in lld.keys():
+            p1 = [lld.get('Operating System')]
+        if p2 is None and 'Operating System' in rld.keys():
+            p2 = [rld.get('Operating System')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def assembly_code_sim(self, l, r, lld, rld):
+        p1 = l.get('Assembly Code')
+        p2 = r.get('Assembly Code')
+        if p1 is None and 'Assembly Code' in lld.keys():
+            p1 = [lld.get('Assembly Code')]
+        if p2 is None and 'Assembly Code' in rld.keys():
+            p2 = [rld.get('Assembly Code')]     
+        if p1 is None:
+            p1 = [""]
+        if p2 is None:
+            p2 = [""]
+        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+
+    def green_indicator_sim(self, l, r, lld, rld):
+        p1 = l.get('Green Indicator')
+        p2 = r.get('Green Indicator')
+        if p1 is None and 'Green Indicator' in lld.keys():
+            p1 = [lld.get('Green Indicator')]
+        if p2 is None and 'Green Indicator' in rld.keys():
+            p2 = [rld.get('Green Indicator')]     
+        if p1 is None:
+            p1 = [""]
+        if p2 is None:
+            p2 = [""]
+        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+
+    def model_levenshtein(self, l, r, lld, rld):
+        p1 = l.get('Model')
+        p2 = r.get('Model')
+        if p1 is None and 'Model' in lld.keys():
+            p1 = [lld.get('Model')]
+        if p2 is None and 'Model' in rld.keys():
+            p2 = [rld.get('Model')]     
+        if p1 is None:
+            p1 = [""]
+        if p2 is None:
+            p2 = [""]
+        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+
+    def product_model_levenshtein(self, l, r, lld, rld):
+        p1 = l.get('Product Model')
+        p2 = r.get('Product Model')
+        if p1 is None and 'Product Model' in lld.keys():
+            p1 = [lld.get('Product Model')]
+        if p2 is None and 'Product Model' in rld.keys():
+            p2 = [rld.get('Product Model')]     
+        if p1 is None:
+            p1 = [""]
+        if p2 is None:
+            p2 = [""]
+        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+
+    def processor_core_levenshtein(self, l, r, lld, rld):
+        p1 = l.get('Processor Core')
+        p2 = r.get('Processor Core')
+        if p1 is None and 'Processor Core' in lld.keys():
+            p1 = [lld.get('Processor Core')]
+        if p2 is None and 'Processor Core' in rld.keys():
+            p2 = [rld.get('Processor Core')]     
+        if p1 is None:
+            p1 = [""]
+        if p2 is None:
+            p2 = [""]
+        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+
+    def device_types_levenshtein(self, l, r, lld, rld):
+        p1 = l.get('Device Types')
+        p2 = r.get('Device Types')
+        if p1 is None and 'Device Types' in lld.keys():
+            p1 = [lld.get('Device Types')]
+        if p2 is None and 'Device Types' in rld.keys():
+            p2 = [rld.get('Device Types')]     
+        if p1 is None:
+            p1 = [""]
+        if p2 is None:
+            p2 = [""]
+        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
 
     def getVector(self, l, r):
         #initialize vector and empty lld and rld (left long descript, right long descript)
@@ -529,7 +638,7 @@ class FeatureGenerator:
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard, self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard, self.green_compliant_jaccard:
+        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard, self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard, self.green_compliant_jaccard, self.form_factor_jaccard, self.assembly_code_sim, self.model_levenshtein, self.green_indicator_sim, self.product_model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.device_types_levenshtein:
             y = func(l, r, lld, rld)
             vector.append(y)
 
