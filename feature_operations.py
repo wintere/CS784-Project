@@ -308,13 +308,200 @@ class FeatureGenerator:
             p1 = lld.get('Brand Name')
         if p2 is None and 'Brand Name' in rld.keys():
             p2 = rld.get('Brand Name')
-        if p1 is None and p2 is None:
-            return 0.0
+        # if p1 is None and p2 is None:
+        #     return 0.0
         if p1 is None:
             p1 = [""]
         if p2 is None:
             p2 = [""]
         return py_stringmatching.simfunctions.jaro(p1[0].lower(), p2[0].lower())
+
+    def limited_warranty_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Limited Warranty')
+        p2 = r.get('Limited Warranty')
+        if p1 is None and 'Limited Warranty' in lld.keys():
+            p1 = [lld.get('Limited Warranty')]
+        if p2 is None and 'Limited Warranty' in rld.keys():
+            p2 = [rld.get('Limited Warranty')]
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def weight_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Weight')
+        p2 = r.get('Weight')
+        if p1 is None and 'Weight' in lld.keys():
+            p1 = [lld.get('Weight')]
+        if p2 is None and 'Weight' in rld.keys():
+            p2 = [rld.get('Weight')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def width_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Width')
+        p2 = r.get('Width')
+        if p1 is None and 'Width' in lld.keys():
+            p1 = [lld.get('Width')]
+        if p2 is None and 'Width' in rld.keys():
+            p2 = [rld.get('Width')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def depth_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Depth')
+        p2 = r.get('Depth')
+        if p1 is None and 'Depth' in lld.keys():
+            p1 = [lld.get('Depth')]
+        if p2 is None and 'Depth' in rld.keys():
+            p2 = [rld.get('Depth')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def product_series_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Product Series')
+        p2 = r.get('Product Series')
+        if p1 is None and 'Product Series' in lld.keys():
+            p1 = [lld.get('Product Series')]
+        if p2 is None and 'Product Series' in rld.keys():
+            p2 = [rld.get('Product Series')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def features_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Features')
+        p2 = r.get('Features')
+        if p1 is None and 'Features' in lld.keys():
+            p1 = [lld.get('Features')]
+        if p2 is None and 'Features' in rld.keys():
+            p2 = [rld.get('Features')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def weight_approximate_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Weight (Approximate)')
+        p2 = r.get('Weight (Approximate)')
+        if p1 is None and 'Weight (Approximate)' in lld.keys():
+            p1 = [lld.get('Weight (Approximate)')]
+        if p2 is None and 'Weight (Approximate)' in rld.keys():
+            p2 = [rld.get('Weight (Approximate)')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def product_line_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Product Line')
+        p2 = r.get('Product Line')
+        if p1 is None and 'Product Line' in lld.keys():
+            p1 = [lld.get('Product Line')]
+        if p2 is None and 'Product Line' in rld.keys():
+            p2 = [rld.get('Product Line')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def screen_size_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Screen Size')
+        p2 = r.get('Screen Size')
+        if p1 is None and 'Screen Size' in lld.keys():
+            p1 = [lld.get('Screen Size')]
+        if p2 is None and 'Screen Size' in rld.keys():
+            p2 = [rld.get('Screen Size')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def screen_size_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Screen Size')
+        p2 = r.get('Screen Size')
+        if p1 is None and 'Screen Size' in lld.keys():
+            p1 = [lld.get('Screen Size')]
+        if p2 is None and 'Screen Size' in rld.keys():
+            p2 = [rld.get('Screen Size')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+    def type_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Type')
+        p2 = r.get('Type')
+        if p1 is None and 'Type' in lld.keys():
+            p1 = [lld.get('Type')]
+        if p2 is None and 'Type' in rld.keys():
+            p2 = [rld.get('Type')]     
+        if p1 is not None:
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+        if p2 is not None:
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
+        #     return 0.0
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
 
     def getVector(self, l, r):
@@ -342,7 +529,7 @@ class FeatureGenerator:
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard,self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim:
+        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard,self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard:
             y = func(l, r, lld, rld)
             vector.append(y)
 
