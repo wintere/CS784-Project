@@ -469,15 +469,15 @@ class FeatureGenerator:
         #     return 0.0
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
-    def screen_size_jaccard(self, l, r, lld, rld):
+    def green_compliant_jaccard(self, l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
-        p1 = l.get('Screen Size')
-        p2 = r.get('Screen Size')
-        if p1 is None and 'Screen Size' in lld.keys():
-            p1 = [lld.get('Screen Size')]
-        if p2 is None and 'Screen Size' in rld.keys():
-            p2 = [rld.get('Screen Size')]     
+        p1 = l.get('Green Compliant')
+        p2 = r.get('Green Compliant')
+        if p1 is None and 'Green Compliant' in lld.keys():
+            p1 = [lld.get('Green Compliant')]
+        if p2 is None and 'Green Compliant' in rld.keys():
+            p2 = [rld.get('Green Compliant')]     
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -529,7 +529,7 @@ class FeatureGenerator:
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard,self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard:
+        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard, self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard, self.green_compliant_jaccard:
             y = func(l, r, lld, rld)
             vector.append(y)
 
