@@ -4,14 +4,13 @@ import py_stringmatching.tokenizers
 import py_stringmatching.simfunctions
 from information_extraction import InformationExtractor
 from html_parser import MyHtmlParser
-
 #Rules to nest in:
 #always return MISMATCH or FALSE if 'stress testing DO NOT BUY' in product name
 #as these are not real products
 
 pld = 'Product Long Description'
 
-#helper method
+#helper method (like get but retuns an empty list instead of None for easy unioning/extending)
 def fetchSet(dict, key):
     if key not in dict:
         return []
@@ -24,8 +23,8 @@ def fetchSet(dict, key):
 class FeatureGenerator:
     def __init__(self):
         self.ie = InformationExtractor()
-        self.parser = MyHtmlParser()
         self.syn_dict = self.ie.syn_dict
+        self.parser = MyHtmlParser()
 
     def product_name_jaccard(self, l, r):
         p1 = l.get('Product Name')[0]
@@ -50,6 +49,7 @@ class FeatureGenerator:
         else:
             return 0
 
+<<<<<<< Updated upstream
     def product_short_description_tfidf(self, l, r):
         p1_tokens = []
         p2_tokens = []
@@ -71,6 +71,8 @@ class FeatureGenerator:
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+=======
+>>>>>>> Stashed changes
 
     def total_key_similarity(self, l, r, lld, rld):
         l_keys = list(l.keys())
@@ -214,31 +216,48 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
-    def brand_name_sim(self,l, r):
-        p1 = l.get('Brand')
-        p2 = r.get('Brand')
-        if p1 is None:
+    def brand_name_sim(self,l, r, lld, rld):
+        p1 = ""
+        p2 = ""
+        # fetch l brand name
+        if 'Brand' in l:
+            p1 = l.get('Brand')[0]
+        elif 'Brand' in lld:
+            p1 = lld['Brand']
+        else:
             p1 = self.ie.brand_from_string(l.get('Product Name')[0])
-        else:
-            p1 = p1[0]
-            if p1 in self.syn_dict:
-                p1 = self.syn_dict[p1]
-        if p2 is None:
-            p2 = self.ie.brand_from_string(r.get('Product Name')[0])
-        else:
-            p2 = p2[0]
-            if p2 in self.syn_dict:
-                p2 = self.syn_dict[p2]
-        return py_stringmatching.simfunctions.jaro_winkler(p1, p2)
 
-    def category_match(self, l, r):
+        # standardize
+        if p1 in self.syn_dict:
+                p1 = self.syn_dict[p1]
+
+        # fetch r brand name
+        if 'Brand' in r:
+            p2 = r.get('Brand')[0]
+        elif 'Brand' in rld:
+            p2 = rld['Brand']
+        else:
+            p2 = self.ie.brand_from_string(r.get('Product Name')[0])
+
+        # standardize
+        if p2 in self.syn_dict:
+            p2 = self.syn_dict[p2]
+
+        y = max(len(p1), len(p2))
+        if y > 0:
+            return (py_stringmatching.simfunctions.levenshtein(p1.title(), p2.title())/y)
+        else:
+            return 0
+
+    #possibly remove? there are some wild mistakes in our data as far as product type go (ie. headphones classifed as underpants)
+    def product_type_match(self, l, r, lld, rld):
         l_cat = set()
         r_cat = set()
-        l_cat = l_cat.union(fetchSet(l, 'Product Type'), fetchSet(l, 'Category'))
-        r_cat = r_cat.union(fetchSet(r, 'Product Type'), fetchSet(r, 'Category'))
-        return py_stringmatching.simfunctions.tfidf(l_cat, r_cat)
+        l_cat = l_cat.union(fetchSet(l, 'Product Type'), fetchSet(lld,'Product Type'), fetchSet(lld, 'Type'))
+        r_cat = r_cat.union(fetchSet(r, 'Product Type'),  fetchSet(rld,'Product Type'), fetchSet(rld, 'Type'))
+        return py_stringmatching.simfunctions.jaccard(l_cat, r_cat)
 
-    def color_match(self, l, r):
+    def color_match(self, l, r, lld, rld):
         l_color = set()
         r_color = set()
         # step 1: try it the easy way
@@ -256,11 +275,11 @@ class FeatureGenerator:
         r_name = r.get('Product Name')[0]
         r_color = r_color.union((self.ie.color_from_name(r_name)))
 
-        if 'Product Short Description' in l:
-            l_color = l_color.union(self.ie.color_from_name(l['Product Short Description'][0]))
-        if 'Product Short Description' in r:
-            r_color = r_color.union(self.ie.color_from_name(r['Product Short Description'][0]))
-        return py_stringmatching.simfunctions.jaccard(l_color, r_color)
+        if 'Color' in lld:
+            l_color.add(lld['Color'][0])
+        if 'Color' in rld:
+            r_color.add(rld['Color'][0])
+        return py_stringmatching.simfunctions.overlap_coefficient(l_color, r_color)
 
     def big_text_jaccard(self, l, r):
         p1_tokens = []
@@ -332,12 +351,20 @@ class FeatureGenerator:
 
 
         # functions that do not take in long description dictionaries
+<<<<<<< Updated upstream
         for func in self.is_stress_test, self.product_long_description_tfidf, self.product_long_description_jaccard, self.product_type_tfidf, self.product_type_jaccard, self.assembled_product_length_jaccard, self.assembled_product_width_jaccard, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.product_short_description_jaccard,self.big_text_tfidf, self.big_text_jaccard:
+=======
+        for func in self.is_stress_test, self.product_name_tfidf, self.big_text_tfidf:
+>>>>>>> Stashed changes
             x = func(l, r)
             vector.append(x)
 
         # functions that do
+<<<<<<< Updated upstream
         for func in self.long_descript_key_sim, self.total_key_similarity, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.brand_and_brand_name_sim:
+=======
+        for func in self.color_match, self.brand_name_sim, self.long_descript_key_sim, self.product_type_match, self.total_key_similarity:
+>>>>>>> Stashed changes
             y = func(l, r, lld, rld)
             vector.append(y)
 

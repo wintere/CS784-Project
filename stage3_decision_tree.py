@@ -38,7 +38,6 @@ for line in training_fd:
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
     v = f.getVector(l, r)
-    #print(v, match_status)
     # Now append the feature vector + label to our data structures
     training_data.append(v)
     labels.append(match_status)
@@ -48,7 +47,7 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = tree.DecisionTreeClassifier(min_samples_leaf=2)
+clf = tree.DecisionTreeClassifier()
 clf = clf.fit(training_data, labels)
 
 true_positives = 0
@@ -61,7 +60,7 @@ dataset_fp = sys.argv[2]
 dataset_fd = open(dataset_fp, mode='r', encoding="latin-1")
 
 # Set up the training data
-print("Analyzing the full dataset...")
+print("Analyzing the testing dataset...")
 for line in dataset_fd:
     # Split line into 3 important parts (tuple1, tuple2, label)
     seg = re.split(jumbo_pattern, line)
