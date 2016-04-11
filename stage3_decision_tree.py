@@ -47,7 +47,7 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = tree.DecisionTreeClassifier()
+clf = tree.DecisionTreeClassifier(min_samples_leaf=2)
 clf = clf.fit(training_data, labels)
 
 true_positives = 0

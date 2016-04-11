@@ -99,4 +99,4 @@ class InformationExtractor:
                 if len(candidate) > len(chosen):
                     chosen = candidate
 
-        return chosen
+        return chosen.lower()

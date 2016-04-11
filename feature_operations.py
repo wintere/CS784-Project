@@ -27,16 +27,18 @@ class FeatureGenerator:
         self.parser = MyHtmlParser()
         self.syn_dict = self.ie.syn_dict
 
+    #CHECKED
     def product_name_jaccard(self, l, r):
-        p1 = l.get('Product Name')[0]
-        p2 = r.get('Product Name')[0]
+        p1 = l.get('Product Name')[0].lower()
+        p2 = r.get('Product Name')[0].lower()
         p1_tokens = py_stringmatching.tokenizers.whitespace(p1)
         p2_tokens = py_stringmatching.tokenizers.whitespace(p2)
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+    #CHECKED
     def product_name_tfidf(self,l, r):
-        p1 = l.get('Product Name')[0]
-        p2 = r.get('Product Name')[0]
+        p1 = l.get('Product Name')[0].lower()
+        p2 = r.get('Product Name')[0].lower()
         p1_tokens = py_stringmatching.tokenizers.whitespace(p1)
         p2_tokens = py_stringmatching.tokenizers.whitespace(p2)
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
@@ -50,6 +52,7 @@ class FeatureGenerator:
         else:
             return 0
 
+    #CHECKED
     def product_short_description_tfidf(self, l, r):
         p1_tokens = []
         p2_tokens = []
@@ -59,8 +62,11 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
-        
+
+    #CHECKED
     def product_short_description_jaccard(self, l, r):
         p1_tokens = []
         p2_tokens = []
@@ -70,8 +76,11 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+    #CHECKED
     def total_key_similarity(self, l, r, lld, rld):
         l_keys = list(l.keys())
         r_keys = list(r.keys())
@@ -79,17 +88,20 @@ class FeatureGenerator:
         rld_keys = list(rld.keys())
         l_keys.extend(lld_keys)
         r_keys.extend(rld_keys)
-        return py_stringmatching.simfunctions.monge_elkan(l_keys, r_keys)
+        l_keys = [x.lower() for x in l_keys]
+        r_keys = [x.lower() for x in r_keys]
+        return py_stringmatching.simfunctions.jaccard(l_keys, r_keys)
 
 
+    #CHECKED
     def long_descript_key_sim(self, l, r, lld, rld):
         lld_keys = list(lld.keys())
         rld_keys = list(rld.keys())
-        if len(lld_keys) == 0 or len(rld_keys) == 0:
-            return 0
-        else:
-            return py_stringmatching.simfunctions.monge_elkan(lld_keys, rld_keys)
+        lld_keys = [x.lower() for x in lld_keys]
+        rld_keys = [x.lower() for x in rld_keys]
+        return py_stringmatching.simfunctions.jaccard(lld_keys, rld_keys)
 
+    #CHECKED
     def product_long_description_tfidf(self,l, r):
         p1_tokens = []
         p2_tokens = []
@@ -99,8 +111,11 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
-        
+
+    #CHECKED
     def product_long_description_jaccard(self, l, r):
         p1_tokens = []
         p2_tokens = []
@@ -110,41 +125,23 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
-    def product_type_tfidf(self,l, r):
+    #CHECKED
+    def product_type_sim(self,l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
-        p1 = l.get('Product Type')
-        p2 = r.get('Product Type')
-        if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
-        if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
-        
-    def product_type_jaccard(self,l, r):
-        p1_tokens = []
-        p2_tokens = []
-        p1 = l.get('Product Type')
-        p2 = r.get('Product Type')
-        if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
-        if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens.extend(fetchSet(l,'Product Type'))
+        p1_tokens.extend(fetchSet(lld, 'Product Type'))
+        p2_tokens.extend(fetchSet(r,'Product Type'))
+        p2_tokens.extend(fetchSet(rld, 'Product Type'))
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
-    def product_segment_tfidf(self,l, r):
-        p1_tokens = []
-        p2_tokens = []
-        p1 = l.get('Product Segment')
-        p2 = r.get('Product Segment')
-        if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
-        if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
-        
+    #CHECKED
     def product_segment_jaccard(self,l, r):
         p1_tokens = []
         p2_tokens = []
@@ -154,8 +151,11 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
-        
+
+    #CHECKED
     def manufacturer_jaccard(self, l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
@@ -172,8 +172,11 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
-        
+
+    #STRING DISTANCE INSTEAD?
     def manufacturer_part_number_jaccard(self, l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
@@ -190,55 +193,46 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
-        
-    def assembled_product_length_jaccard(self, l, r):
-        p1_tokens = []
-        p2_tokens = []
-        p1 = l.get('Assembled Product Length')
-        p2 = r.get('Assembled Product Length')
-        if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
-        if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
-        
-    def assembled_product_width_jaccard(self, l, r):
-        p1_tokens = []
-        p2_tokens = []
-        p1 = l.get('Assembled Product Width')
-        p2 = r.get('Assembled Product Width')
-        if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
-        if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
-    def brand_name_sim(self,l, r):
-        p1 = l.get('Brand')
-        p2 = r.get('Brand')
-        if p1 is None:
-            p1 = self.ie.brand_from_string(l.get('Product Name')[0])
-        else:
-            p1 = p1[0]
-            if p1 in self.syn_dict:
-                p1 = self.syn_dict[p1]
-        if p2 is None:
-            p2 = self.ie.brand_from_string(r.get('Product Name')[0])
-        else:
-            p2 = p2[0]
-            if p2 in self.syn_dict:
-                p2 = self.syn_dict[p2]
-        return py_stringmatching.simfunctions.jaro_winkler(p1, p2)
+    #CHECKED
+    def assembled_product_length_sim(self, l, r, lld, rld):
+        p1 = ''
+        p2 = ''
+        if 'Assembled Product Length' in l:
+            p1 = l.get('Assembled Product Length')[0]
+        if 'Assembled Product Length' in r:
+            p2 = r.get('Assembled Product Length')[0]
+        if p1 is '' and 'Assembled Product Length' in lld:
+            p1 = lld.get('Assembled Product Length')
+        if p2 is '' and 'Assembled Product Length' in rld:
+            p2 = rld.get('Assembled Product Length')
+        y = max(len(p1), len(p2))
+        if y > 0:
+            return py_stringmatching.simfunctions.levenshtein(p1, p2)/y
+        return 1
 
-    def category_match(self, l, r):
-        l_cat = set()
-        r_cat = set()
-        l_cat = l_cat.union(fetchSet(l, 'Product Type'), fetchSet(l, 'Category'))
-        r_cat = r_cat.union(fetchSet(r, 'Product Type'), fetchSet(r, 'Category'))
-        return py_stringmatching.simfunctions.tfidf(l_cat, r_cat)
+    #CHECKED
+    def assembled_product_width_sim(self, l, r, lld, rld):
+        p1 = ''
+        p2 = ''
+        if 'Assembled Product Width' in l:
+            p1 = l.get('Assembled Product Width')[0]
+        if 'Assembled Product Width' in r:
+            p2 = r.get('Assembled Product Width')[0]
+        if p1 is '' and 'Assembled Product Width' in lld:
+            p1 = lld.get('Assembled Product Width')
+        if p2 is '' and 'Assembled Product Width' in rld:
+            p2 = rld.get('Assembled Product Width')
+        y = max(len(p1), len(p2))
+        if y > 0:
+            return py_stringmatching.simfunctions.levenshtein(p1, p2)/y
+        return 1
 
-    def color_match(self, l, r):
+    #CHECKED
+    def color_match(self, l, r, lld, rld):
         l_color = set()
         r_color = set()
         # step 1: try it the easy way
@@ -256,12 +250,16 @@ class FeatureGenerator:
         r_name = r.get('Product Name')[0]
         r_color = r_color.union((self.ie.color_from_name(r_name)))
 
-        if 'Product Short Description' in l:
-            l_color = l_color.union(self.ie.color_from_name(l['Product Short Description'][0]))
-        if 'Product Short Description' in r:
-            r_color = r_color.union(self.ie.color_from_name(r['Product Short Description'][0]))
+        if 'Color' in lld:
+            l_color = l_color.union(fetchSet(lld, 'Color'))
+        if 'Color' in rld:
+            r_color = r_color.union(fetchSet(rld, 'Color'))
+        l_color = [x.lower() for x in l_color]
+        r_color = [x.lower() for x in r_color]
         return py_stringmatching.simfunctions.jaccard(l_color, r_color)
 
+
+    #CHECKED
     def big_text_jaccard(self, l, r):
         p1_tokens = []
         p2_tokens = []
@@ -273,8 +271,12 @@ class FeatureGenerator:
         for key in p2_keys:
             p2_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
             p2_tokens.extend(py_stringmatching.tokenizers.whitespace(r.get(key)[0]))
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+
+    #CHECKED
     def big_text_tfidf(self, l, r):
         p1_tokens = []
         p2_tokens = []
@@ -286,8 +288,11 @@ class FeatureGenerator:
         for key in p2_keys:
             p2_tokens.extend(py_stringmatching.tokenizers.whitespace(key))
             p2_tokens.extend(py_stringmatching.tokenizers.whitespace(r.get(key)[0]))
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
+    #CHECKED
     def brand_and_brand_name_sim(self, l, r, lld, rld):
         p1 = l.get('Brand')
         p2 = r.get('Brand')
@@ -309,7 +314,7 @@ class FeatureGenerator:
             p1 = [""]
         if p2 is None:
             p2 = [""]
-        return py_stringmatching.simfunctions.jaro_winkler(p1[0].lower(), p2[0].lower())
+        return py_stringmatching.simfunctions.jaro(p1[0].lower(), p2[0].lower())
 
 
     def getVector(self, l, r):
@@ -332,12 +337,12 @@ class FeatureGenerator:
 
 
         # functions that do not take in long description dictionaries
-        for func in self.is_stress_test, self.product_long_description_tfidf, self.product_long_description_jaccard, self.product_type_tfidf, self.product_type_jaccard, self.assembled_product_length_jaccard, self.assembled_product_width_jaccard, self.product_name_jaccard, self.product_name_tfidf, self.brand_name_sim, self.color_match, self.product_short_description_tfidf, self.product_short_description_jaccard,self.big_text_tfidf, self.big_text_jaccard:
+        for func in self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_name_tfidf, self.big_text_jaccard, self.product_segment_jaccard:
             x = func(l, r)
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.brand_and_brand_name_sim:
+        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard,self.assembled_product_width_sim, self.assembled_product_length_sim, self.long_descript_key_sim:
             y = func(l, r, lld, rld)
             vector.append(y)
 
