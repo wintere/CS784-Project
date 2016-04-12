@@ -14,7 +14,7 @@ class InformationExtractor:
         #initialize brand trie
         brand_trie = datrie.Trie(string.printable)
         syn_dict = dict()
-        with open('big_dict.csv', 'r') as brand_dict_csv_file:
+        with open('big_dict.csv', 'r', encoding='latin-1') as brand_dict_csv_file:
             brand_dict_reader = csv.reader(brand_dict_csv_file, delimiter=',', quotechar='"')
             for brand in brand_dict_reader:
                 b_name = brand[0]
