@@ -14,6 +14,8 @@ pld = 'Product Long Description'
 psd = 'Product Short Description'
 bar_reg = r'[ \|\[\]]'
 
+
+
 #helper method
 def fetchSet(dict, key):
     if key not in dict:
@@ -57,7 +59,7 @@ class FeatureGenerator:
 
     def is_stress_test(self, l, r):
         p1 = l.get('Product Name')
-        p2 = r.get('Proudct Name')
+        p2 = r.get('Product Name')
         if (p1 is not None and 'stress testing' in p1[0].lower()) or (p2 is not None and 'stress testing' in p2[0].lower()):
             return 1
         else:
@@ -85,7 +87,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -312,8 +313,6 @@ class FeatureGenerator:
             p1 = lld.get('Brand Name')
         if p2 is None and 'Brand Name' in rld.keys():
             p2 = rld.get('Brand Name')
-        # if p1 is None and p2 is None:
-        #     return 0.0
         if p1 is None:
             p1 = [""]
         if p2 is None:

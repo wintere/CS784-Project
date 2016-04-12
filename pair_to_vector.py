@@ -60,11 +60,13 @@ for line in fd:
         if count < 100:
             l = json.loads(pair1_json)
             r = json.loads(pair2_json)
+            l
             v = f.getVector(l, r)
             a = f.getVectorAttributes()
             if v[-1] == 0 and match_status.strip() == "?MATCH":
                 m += 1
-            print(match_status)
+            for i in range(len(v)):
+                print(a[i], ":", v[i], match_status)
             count += 1
         if count == 100:
             break

@@ -37,14 +37,19 @@ for line in training_fd:
     pair1_json = seg[4]
     pair2_json = seg[8]
     match_status = seg[9]
-    
+
     # Set up the feature vector for these tuples
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
     v = f.getVector(l, r)
+
+    if "?MATCH" in match_status:
+        label = 1
+    else:
+        label = -1
     # Now append the feature vector + label to our data structures
     training_data.append(v)
-    labels.append(match_status)
+    labels.append(label)
     training_samples += 1
     
 training_fd.close()
@@ -60,6 +65,7 @@ true_positives = 0
 false_positives = 0
 true_negatives = 0
 false_negatives = 0
+unknown = 0
 
 # Open the file with the full dataset
 dataset_fp = sys.argv[2]
@@ -79,14 +85,25 @@ for line in dataset_fd:
     r = json.loads(pair2_json)
     dataset_count += 1
     v = f.getVector(l, r)
-    match_guess = clf.predict([v])
-    if match_guess == '?MATCH':
-        if match_guess == match_status:
+    match_vector = clf.predict_proba([v])
+    if "?MATCH" in match_status:
+        label = 1
+    if "?MISMATCH" in match_status:
+        label = -1
+    if match_vector[0][0] > 0.5:
+        match_guess = -1
+    if match_vector[0][1] > 0.5:
+        match_guess = 1
+    if match_vector[0][1] == 0.5:
+        match_guess = 0
+        unknown += 1
+    if match_guess == 1:
+        if match_guess == label:
             true_positives += 1
         else:
             false_positives += 1
-    else:
-        if match_guess == match_status:
+    elif match_guess == -1:
+        if match_guess == label:
             true_negatives += 1
         else:
             false_negatives += 1
@@ -100,6 +117,12 @@ precision = float (true_positives)/(true_positives + false_positives)
 recall = float(true_positives)/(true_positives + false_negatives)
 
 # CSV stats
-print("Method,Data records,Precision,Recall,True positives,False positives,True negatives,False negatives,Execution Time")
-print("DT",str(dataset_count)+","+str(precision)+","+str(recall)+","+str(true_positives)+","+str(false_positives)+","+str(true_negatives)+","+str(false_negatives)+","+str(diff_time.total_seconds()))
+print("Precision:", precision)
+print("Recall:", recall)
+print("True positives:", true_positives)
+print("False positives:", false_positives)
+print("True negatives:", true_negatives)
+print("False negatives:", false_negatives)
+print("Unknown values:", unknown)
+print("Computation time:", str(diff_time.total_seconds()/60.0), " minutes")
 
