@@ -48,7 +48,7 @@ for line in training:
         r = json.loads(pair2_json)
     except ValueError:
         print("invalid json string" + id_string)
-    v = f.getVector(l, r)
+    v = f.getVector(l, r, allFuncs=True)
     if "?MATCH" in match_status:
         label = 1
     else:
@@ -77,7 +77,7 @@ for line in test:
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
     dataset_count += 1
-    v = f.getVector(l, r)
+    v = f.getVector(l, r, allFuncs=True)
     match_vector = clf.predict_proba([v])
     if "?MATCH" in match_status:
         label = 1
