@@ -1,11 +1,13 @@
 __author__ = 'wintere'
 
 import csv
+import lxml
 import datrie
 import re
 import string
 import sys
 from collections import defaultdict
+from bs4 import BeautifulSoup
 
 class InformationExtractor:
 
@@ -39,6 +41,20 @@ class InformationExtractor:
         with open('colors.txt','r') as c_file:
             for c in c_file.readlines():
                 self.colors.append(c.strip('\n'))
+
+    def text_from_html(self, description):
+        if len(description) < 5:
+            return description.lower()
+        try:
+            html = BeautifulSoup(description, "lxml")
+            text = html.getText(' ')
+            if text is None:
+                return description.lower()
+            else:
+                return text.lower()
+        except UserWarning:
+            return description.lower()
+
 
 
     def color_from_name(self, product_name):
