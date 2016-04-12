@@ -27,6 +27,7 @@ dataset_count = 0
 # Set up the training data
 print("Setting up training data...")
 f = FeatureGenerator()
+feature_labels = f.getVectorAttributes()
 for line in training_fd:
     # Split line into 3 important parts (tuple1, tuple2, label)
     seg = re.split(jumbo_pattern, line)
@@ -47,9 +48,11 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = tree.DecisionTreeClassifier(min_samples_leaf=2)
+clf = tree.DecisionTreeClassifier(min_samples_split=3)
 clf = clf.fit(training_data, labels)
-
+with open("sample.dot", 'w') as g:
+    tree.export_graphviz(clf, out_file=g, feature_names=feature_labels)
+g.close()
 true_positives = 0
 false_positives = 0
 true_negatives = 0
