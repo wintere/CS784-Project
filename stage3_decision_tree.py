@@ -1,5 +1,6 @@
 __author__ = 'wintere'
 
+import datetime
 import re
 import json
 import sys
@@ -23,6 +24,8 @@ training_data = []
 labels = []
 
 dataset_count = 0
+
+start_time = datetime.datetime.now()
 
 # Set up the training data
 print("Setting up training data...")
@@ -85,17 +88,15 @@ for line in dataset_fd:
         else:
             false_negatives += 1
 
-    
 dataset_fd.close()
-
-print("Finished analyzing " + str(dataset_count) + " data records")
-print("True positives: " + str(true_positives))
-print("False positives: " + str(false_positives))
-print("True negatives: " + str(true_negatives))
-print("False negatives: " + str(false_negatives))
-
+            
+# Calculate end results
+end_time = datetime.datetime.now()
+diff_time = end_time - start_time
 precision = float (true_positives)/(true_positives + false_positives)
 recall = float(true_positives)/(true_positives + false_negatives)
-print ("Precision:",precision, "Recall:",recall)
 
+# CSV stats
+print("Method,Data records,Precision,Recall,True positives,False positives,True negatives,False negatives,Execution Time")
+print("DT",str(dataset_count)+","+str(precision)+","+str(recall)+","+str(true_positives)+","+str(false_positives)+","+str(true_negatives)+","+str(false_negatives)+","+str(diff_time.total_seconds()))
 

@@ -2,6 +2,7 @@ __author__ = 'wintere'
 
 from sklearn import svm
 
+import datetime
 import re
 import json
 import sys
@@ -24,6 +25,8 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 
 training_data = []
 labels = []
+
+start_time = datetime.datetime.now()
 
 f = FeatureGenerator()
 clf = svm.SVC()
@@ -53,10 +56,12 @@ training.close()
 print("training loaded")
 clf.fit(training_data, labels)
 
-true_pos = 0
-false_pos = 0
-true_neg = 0
-false_neg = 0
+true_positives = 0
+false_positives = 0
+true_negatives = 0
+false_negatives = 0
+dataset_count = 0
+
 for line in test:
     seg = re.split(jumbo_pattern, line)
     pair1_json = seg[4]
@@ -65,24 +70,27 @@ for line in test:
 
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
+    dataset_count += 1
     v = f.getVector(l, r)
     match_guess = clf.predict([v])
     if match_guess == '?MATCH':
         if match_guess == match_status:
-            true_pos += 1
+            true_positives += 1
         else:
-            false_pos += 1
+            false_positives += 1
     else:
         if match_guess == match_status:
-            true_neg += 1
+            true_negatives += 1
         else:
-            false_neg += 1
+            false_negatives += 1
 test.close()
 
-print("True positives: " + str(true_pos))
-print("False positives: " + str(false_pos))
-print("True negatives: " + str(true_neg))
-print("False negatives: " + str(false_neg))
-precision = float (true_pos)/(true_pos + false_pos)
-recall = float(true_pos)/(true_pos + false_neg)
-print ("Precision:",precision, "Recall:",recall)
+# Calculate end results
+end_time = datetime.datetime.now()
+diff_time = end_time - start_time
+precision = float (true_positives)/(true_positives + false_positives)
+recall = float(true_positives)/(true_positives + false_negatives)
+
+# CSV stats
+print("Data records,Precision,Recall,True positives,False positives,True negatives,False negatives,Execution Time")
+print(str(dataset_count)+","+str(precision)+","+str(recall)+","+str(true_positives)+","+str(false_positives)+","+str(true_negatives)+","+str(false_negatives)+","+str(diff_time.total_seconds()))

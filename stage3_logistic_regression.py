@@ -1,5 +1,6 @@
 __author__ = 'wintere'
 
+import datetime
 import re
 import json
 import sys
@@ -27,6 +28,7 @@ training_samples = 0
 training_data = []
 labels = []
 
+start_time = datetime.datetime.now()
 
 # Set up the training data
 print("Setting up training data...");
@@ -44,7 +46,7 @@ for line in training_fd:
     ln = l['Product Name']
     rn = r['Product Name']
     if 'stress testing item' in ln[0].lower() or 'stress' in rn[0].lower():
-        print("Skipped stress testing item.")
+        test = 0 # do nothing print("Skipped stress testing item.")
     else:
         v = f.getVector(l, r)
         #print(v, match_status)
@@ -103,13 +105,13 @@ for line in dataset_fd:
     
 dataset_fd.close()
 
-print("Finished analyzing " + str(dataset_count) + " data records")
-print("True positives: " + str(true_positives))
-print("False positives: " + str(false_positives))
-print("True negatives: " + str(true_negatives))
-print("False negatives: " + str(false_negatives))
-
+# Calculate end results
+end_time = datetime.datetime.now()
+diff_time = end_time - start_time
 precision = float (true_positives)/(true_positives + false_positives)
 recall = float(true_positives)/(true_positives + false_negatives)
-print ("Precision:",precision, "Recall:",recall)
+
+# CSV stats
+print("Data records,Precision,Recall,True positives,False positives,True negatives,False negatives,Execution Time")
+print(str(dataset_count)+","+str(precision)+","+str(recall)+","+str(true_positives)+","+str(false_positives)+","+str(true_negatives)+","+str(false_negatives)+","+str(diff_time.total_seconds()))
 
