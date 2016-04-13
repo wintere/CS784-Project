@@ -6,9 +6,6 @@ from information_extraction import InformationExtractor
 from html_parser import MyHtmlParser
 import re
 
-#Rules to nest in:
-#always return MISMATCH or FALSE if 'stress testing DO NOT BUY' in product name
-#as these are not real products
 
 pld = 'Product Long Description'
 psd = 'Product Short Description'
@@ -50,7 +47,7 @@ class FeatureGenerator:
         # FOR LOG REGRESSION
         self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_long_description_tfidf, self.product_name_jaccard,
 
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.category_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf,
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.category_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard
 
 
 
@@ -198,13 +195,13 @@ class FeatureGenerator:
         p2_tokens = []
         p1 = l.get('Manufacturer')
         p2 = r.get('Manufacturer')
-        
+
         # If these fields don't exist in the main key-value set, then check the parsed Product Long Description data.
         if p1 is None and 'Manufacturer' in lld.keys():
             p1 = [lld.get('Manufacturer')]
         if p2 is None and 'Manufacturer' in rld.keys():
             p2 = [rld.get('Manufacturer')]
-        
+
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -219,7 +216,7 @@ class FeatureGenerator:
         p2_tokens = []
         p1 = l.get('Manufacturer Part Number')
         p2 = r.get('Manufacturer Part Number')
- 
+
         # If these fields don't exist in the main key-value set, then check the parsed Product Long Description data.
         if p1 is None and 'Manufacturer Part Number' in lld.keys():
             p1 = [lld.get('Manufacturer Part Number')]
@@ -312,6 +309,52 @@ class FeatureGenerator:
         p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+    def big_text_no_pld_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1_keys = l.keys()
+        p2_keys = r.keys()
+        p1_more_keys = lld.keys()
+        p2_more_keys = rld.keys()
+        for key in p1_keys:
+            if key != 'Product Long Description':
+                p1_tokens.extend(cleanTokenize(key))
+                p1_tokens.extend(cleanTokenize(l.get(key)[0]))
+        for key in p2_keys:
+            if key != 'Product Long Description':
+                p2_tokens.extend(cleanTokenize(key))
+                p2_tokens.extend(cleanTokenize(r.get(key)[0]))
+        for key in p1_more_keys:
+            if key != 'Product Long Description' and key not in p1_keys:
+                p1_tokens.extend(cleanTokenize(key))
+                p1_tokens.extend(cleanTokenize(lld.get(key)))
+        for key in p2_more_keys:
+            if key != 'Product Long Description' and key not in p2_keys:
+                p2_tokens.extend(cleanTokenize(key))
+                p2_tokens.extend(cleanTokenize(rld.get(key)))
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+
+    def all_key_value_jaccard(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1_keys = l.keys()
+        p2_keys = r.keys()
+        p1_more_keys = lld.keys()
+        p2_more_keys = rld.keys()
+        for key in p1_keys:
+            p1_tokens.extend(str(key + ':' + l.get(key)[0]))
+        for key in p2_keys:
+            p2_tokens.extend(str(key + ':' + r.get(key)[0]))
+        for key in p1_more_keys:
+            if key not in p1_keys:
+                p1_tokens.extend(str(key + ':' + lld.get(key)))
+        for key in p2_more_keys:
+            if key not in p2_keys:
+                p2_tokens.extend(str(key + ':' + rld.get(key)))
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
     def big_text_tfidf(self, l, r):
