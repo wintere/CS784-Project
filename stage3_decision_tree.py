@@ -43,7 +43,7 @@ for line in training_fd:
     # Set up the feature vector for these tuples
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
-    v = f.getVector(l, r, allFuncs=True)
+    v = f.getVector(l, r)
 
     if "?MATCH" in match_status:
         label = 1

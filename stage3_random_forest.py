@@ -6,8 +6,7 @@ import json
 import sys
 from feature_operations import FeatureGenerator
 from sklearn import ensemble
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
+from sklearn import cross_validation
 
 
 # # put the proper file path to the pairs source here
@@ -72,6 +71,8 @@ dataset_fp = sys.argv[2]
 dataset_fd = open(dataset_fp, mode='r', encoding="ascii", errors='ignore')
 
 # Set up the training data
+testing_data = []
+testing_labels = []
 print("Analyzing the testing dataset...")
 for line in dataset_fd:
     # Split line into 3 important parts (tuple1, tuple2, label)
@@ -111,9 +112,13 @@ for line in dataset_fd:
         else:
             false_negatives += 1
         guesses += 1
+    testing_data.append(v)
+    testing_labels.append(label)
     testing_size += 1
 dataset_fd.close()
-    
+
+# scores = cross_validation.cross_val_score(clf, testing_data, testing_labels, cv=5, scoring='f1_weighted')
+# print("F1 Average: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
 # Calculate end results
 end_time = datetime.datetime.now()
 diff_time = end_time - start_time

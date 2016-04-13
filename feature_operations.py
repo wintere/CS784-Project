@@ -121,7 +121,7 @@ class FeatureGenerator:
         r_keys.extend(rld_keys)
         l_keys = [x.lower() for x in l_keys]
         r_keys = [x.lower() for x in r_keys]
-        return py_stringmatching.simfunctions.jaccard(l_keys, r_keys)
+        return py_stringmatching.simfunctions.monge_elkan(l_keys, r_keys)
 
 
     #CHECKED
@@ -347,10 +347,10 @@ class FeatureGenerator:
             p2 = self.ie.brand_from_string(r.get('Product Name')[0])
 
         #Standardize Extracted Brands
-        if p1 in self.ie.syn_dict:
-            p1 = self.ie.syn_dict[p1]
-        if p2 in self.ie.syn_dict:
-            p2 = self.ie.syn_dict[p2]
+        if p1.upper() in self.ie.syn_dict:
+            p1 = self.ie.syn_dict[p1.upper()]
+        if p2.upper() in self.ie.syn_dict:
+            p2 = self.ie.syn_dict[p2.upper()]
 
         return py_stringmatching.simfunctions.jaro(p1.lower(), p2.lower())
 

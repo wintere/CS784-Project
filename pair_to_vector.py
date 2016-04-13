@@ -62,6 +62,7 @@ for line in fd:
             l = json.loads(pair1_json)
             r = json.loads(pair2_json)
             v = f.getVector(l, r)
+            print(match_status)
             # for i in range(len(v)):
             #     print(a[i], ":", v[i], match_status)
             count += 1

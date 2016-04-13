@@ -86,11 +86,11 @@ for line in test:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
-    if match_vector[0][0] > 0.7:
+    if match_vector[0][0] >= 0.75:
         match_guess = -1
-    if match_vector[0][1] > 0.7:
+    if match_vector[0][1] >= 0.7:
         match_guess = 1
-    if match_vector[0][1] < 0.7 and match_vector[0][0] < 0.7:
+    if match_vector[0][1] < 0.7 and match_vector[0][0] < 0.75:
         unknown += 1
         match_guess = 0
     if match_guess == 1:
