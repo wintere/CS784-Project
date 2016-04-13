@@ -6,6 +6,8 @@ import json
 import sys
 from feature_operations import FeatureGenerator
 from sklearn import ensemble
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
 
 
 # # put the proper file path to the pairs source here
@@ -40,6 +42,7 @@ for line in training_fd:
     # Set up the feature vector for these tuples
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
+    a = f.getVectorAttributes(allFuncs=True)
     v = f.getVector(l, r, allFuncs=True)
     # Now append the feature vector + label to our data structures
     if "?MATCH" in match_status:
@@ -56,7 +59,6 @@ print("Finished setting up " + str(training_samples) + " training samples!")
 # Set up a decision tree classifier using the data passed in
 clf = ensemble.RandomForestClassifier()
 clf = clf.fit(training_data, labels)
-
 true_positives = 0
 false_positives = 0
 true_negatives = 0
@@ -122,3 +124,4 @@ print("True negatives:", true_negatives)
 print("False negatives:", false_negatives)
 print("Unknown values:", unknown)
 print("Computation time:", str(diff_time.total_seconds()/60.0), " minutes")
+

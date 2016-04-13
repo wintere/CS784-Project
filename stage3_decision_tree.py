@@ -6,6 +6,8 @@ import json
 import sys
 from feature_operations import FeatureGenerator
 from sklearn import tree
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
 
 
 # # put the proper file path to the pairs source here
@@ -41,7 +43,7 @@ for line in training_fd:
     # Set up the feature vector for these tuples
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
-    v = f.getVector(l, r)
+    v = f.getVector(l, r, allFuncs=True)
 
     if "?MATCH" in match_status:
         label = 1
@@ -56,11 +58,8 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = tree.DecisionTreeClassifier(min_samples_split=3)
+clf = tree.DecisionTreeClassifier()
 clf = clf.fit(training_data, labels)
-with open("sample.dot", 'w') as g:
-    tree.export_graphviz(clf, out_file=g, feature_names=feature_labels)
-g.close()
 true_positives = 0
 false_positives = 0
 true_negatives = 0
