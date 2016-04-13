@@ -61,7 +61,7 @@ for line in fd:
             print("NET")
             l = json.loads(pair1_json)
             r = json.loads(pair2_json)
-            v = f.getVector(l, r)
+            v = f.getVector(l, r, allFuncs=True)
             print(match_status)
             # for i in range(len(v)):
             #     print(a[i], ":", v[i], match_status)
