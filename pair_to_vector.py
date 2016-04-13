@@ -56,8 +56,9 @@ for line in fd:
 
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
-    if random.randint(0,5) == 1:
-        if count < 6:
+    if random.randint(0,12) == 1:
+        if count < 50:
+            print("NET")
             l = json.loads(pair1_json)
             r = json.loads(pair2_json)
             v = f.getVector(l, r)

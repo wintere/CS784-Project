@@ -60,15 +60,18 @@ print("Finished setting up " + str(training_samples) + " training samples!")
 # Set up a decision tree classifier using the data passed in
 clf = tree.DecisionTreeClassifier()
 clf = clf.fit(training_data, labels)
-true_positives = 0
-false_positives = 0
-true_negatives = 0
-false_negatives = 0
+correct_guesses = 0
+guesses = 0
 unknown = 0
+true_positives = 0
+true_negatives = 0
+false_positives = 0
+false_negatives = 0
+testing_size = 0
 
 # Open the file with the full dataset
 dataset_fp = sys.argv[2]
-dataset_fd = open(dataset_fp, mode='r', encoding="latin-1")
+dataset_fd = open(dataset_fp, mode='r', encoding="ascii", errors='ignore')
 
 # Set up the training data
 print("Analyzing the testing dataset...")
@@ -99,21 +102,26 @@ for line in dataset_fd:
     if match_guess == 1:
         if match_guess == label:
             true_positives += 1
+            correct_guesses += 1
         else:
             false_positives += 1
+        guesses += 1
     elif match_guess == -1:
         if match_guess == label:
             true_negatives += 1
+            correct_guesses += 1
         else:
             false_negatives += 1
+        guesses += 1
+    testing_size += 1
 
 dataset_fd.close()
             
 # Calculate end results
 end_time = datetime.datetime.now()
 diff_time = end_time - start_time
-precision = float (true_positives)/(true_positives + false_positives)
-recall = float(true_positives)/(true_positives + false_negatives)
+precision = float (correct_guesses)/(guesses)
+recall = float(correct_guesses)/(testing_size)
 
 # CSV stats
 print("Precision:", precision)

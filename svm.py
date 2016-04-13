@@ -61,12 +61,15 @@ training.close()
 print("training loaded")
 clf.fit(training_data, labels)
 
-true_positives = 0
-false_positives = 0
-true_negatives = 0
-false_negatives = 0
-dataset_count = 0
+correct_guesses = 0
+guesses = 0
 unknown = 0
+true_positives = 0
+true_negatives = 0
+false_positives = 0
+false_negatives = 0
+testing_size = 0
+
 
 for line in test:
     seg = re.split(jumbo_pattern, line)
@@ -76,7 +79,7 @@ for line in test:
 
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
-    dataset_count += 1
+    testing_size += 1
     v = f.getVector(l, r, allFuncs=True)
     match_vector = clf.predict_proba([v])
     if "?MATCH" in match_status:
@@ -93,21 +96,27 @@ for line in test:
     if match_guess == 1:
         if match_guess == label:
             true_positives += 1
+            correct_guesses += 1
         else:
             false_positives += 1
+        guesses += 1
     elif match_guess == -1:
         if match_guess == label:
             true_negatives += 1
+            correct_guesses += 1
         else:
             false_negatives += 1
+        guesses += 1
+    testing_size += 1
 test.close()
 
 # Calculate end results
 end_time = datetime.datetime.now()
 diff_time = end_time - start_time
-precision = float (true_positives)/(true_positives + false_positives)
-recall = float(true_positives)/(true_positives + false_negatives)
+precision = float (correct_guesses)/(guesses)
+recall = float(correct_guesses)/(testing_size)
 
+# CSV stats
 print("Precision:", precision)
 print("Recall:", recall)
 print("True positives:", true_positives)
