@@ -47,10 +47,12 @@ class InformationExtractor:
             return description.lower()
         try:
             html = BeautifulSoup(description, "lxml")
+            # html = BeautifulSoup(description)
             text = html.getText(' ')
             if text is None:
                 return description.lower()
             else:
+                text = re.sub(r'[^\x00-\x7F]+',' ', text)
                 return text.lower()
         except UserWarning:
             return description.lower()
