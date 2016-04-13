@@ -35,16 +35,16 @@ class FeatureGenerator:
         #ADJUST FUNCTIONS HERE TO KEEP LABELS
 
         #no long description dictionary arguments
-        self.lr_functions = self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_segment_jaccard, self.product_name_jaccard, self.product_long_description_jaccard, self.product_short_description_jaccard,
+        self.lr_functions = self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_segment_jaccard, self.product_name_jaccard, self.product_long_description_jaccard, self.product_name_tfidf
 
         #long dictionary arguments
-        self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.features_tfidf, self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard,
+        self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.features_tfidf, self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard, self.product_short_description_jaccard,
 
 
         # FOR LOG REGRESSION
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_name_jaccard, self.product_name_tfidf, self.product_segment_jaccard, self.product_long_description_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_name_jaccard, self.product_name_tfidf, self.product_segment_jaccard, self.product_long_description_jaccard, self.product_long_description_tfidf
 
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.category_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.limited_warranty_jaccard, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.category_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.limited_warranty_jaccard, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf
 
 
 
@@ -74,11 +74,15 @@ class FeatureGenerator:
             return 0
 
     #CHECKED
-    def product_short_description_tfidf(self, l, r):
+    def product_short_description_tfidf(self, l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
-        p1 = l.get('Product Short Description')
-        p2 = r.get('Product Short Description')
+        p1 = l.get(psd)
+        p2 = r.get(psd)
+        if p1 is None and psd in lld:
+            p1 = lld.get(psd)
+        if p2 is None and psd in rld:
+            p2 = rld.get(psd)
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -86,11 +90,15 @@ class FeatureGenerator:
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
     #CHECKED
-    def product_short_description_jaccard(self, l, r):
+    def product_short_description_jaccard(self, l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
         p1 = l.get('Product Short Description')
         p2 = r.get('Product Short Description')
+        if p1 is None and psd in lld:
+            p1 = lld.get(psd)
+        if p2 is None and psd in rld:
+            p2 = rld.get(psd)
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -646,14 +654,21 @@ class FeatureGenerator:
         return r
 
 
-    def getVectorAttributes(self):
+    def getVectorAttributes(self, allFuncs=False):
         att = []
-        for func in self.lr_functions:
+        if allFuncs:
+            lr_functions = self.all_lr_functions
+            longd_functions = self.all_longd_functions
+        else:
+            lr_functions = self.lr_functions
+            longd_functions = self.all_longd_functions
+
+        for func in lr_functions:
             str = func.__name__
             att.append(str)
 
         # functions that do
-        for func in self.longd_functions:
+        for func in longd_functions:
             str = func.__name__
             att.append(str)
         return att

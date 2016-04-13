@@ -17,7 +17,7 @@ if len(sys.argv) != 2:
 
 # fetch page and split into tuples
 fp = sys.argv[1]
-fd = open(fp, mode='r', errors='replace', encoding='utf-8')
+fd = open(fp, mode='r', errors='ignore', encoding='ascii')
 
 # tuple structure
 # pair1ID-pair2ID#source?pair1ID?{pair1.json}?pair2ID{pair2.json}match
@@ -57,7 +57,7 @@ for line in fd:
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
     if random.randint(0,5) == 1:
-        if count < 100:
+        if count < 6:
             l = json.loads(pair1_json)
             r = json.loads(pair2_json)
             v = f.getVector(l, r)
