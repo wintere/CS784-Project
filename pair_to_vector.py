@@ -17,7 +17,7 @@ if len(sys.argv) != 2:
 
 # fetch page and split into tuples
 fp = sys.argv[1]
-fd = open(fp, mode='r', errors='replace')
+fd = open(fp, mode='r', errors='replace', encoding='utf-8')
 
 # tuple structure
 # pair1ID-pair2ID#source?pair1ID?{pair1.json}?pair2ID{pair2.json}match
@@ -36,7 +36,8 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 # for each line (pair of tuples) in the file
 count = 0
 tuples = set()
-
+s = 0
+m = 0
 # parser = MyHtmlParser()
 f = FeatureGenerator()
 parser = MyHtmlParser()
@@ -55,15 +56,18 @@ for line in fd:
 
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
-    if random.randint(0,100) == 8:
-        if count < 15:
+    if random.randint(0,5) == 1:
+        if count < 100:
             l = json.loads(pair1_json)
             r = json.loads(pair2_json)
             v = f.getVector(l, r)
-            print(v, match_status)
-        count += 1
-
+            # for i in range(len(v)):
+            #     print(a[i], ":", v[i], match_status)
+            count += 1
+        if count == 100:
+            break
 
 fd.close()
+
 
 #l and r are dictionaries

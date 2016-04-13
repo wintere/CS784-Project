@@ -2,6 +2,7 @@ __author__ = 'wintere'
 
 from sklearn import svm
 
+import datetime
 import re
 import json
 import sys
@@ -25,8 +26,10 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 training_data = []
 labels = []
 
+start_time = datetime.datetime.now()
+
 f = FeatureGenerator()
-clf = svm.SVC()
+clf = svm.SVC(probability=True)
 for line in training:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
@@ -45,18 +48,26 @@ for line in training:
         r = json.loads(pair2_json)
     except ValueError:
         print("invalid json string" + id_string)
-    v = f.getVector(l, r)
+    v = f.getVector(l, r, allFuncs=True)
+    if "?MATCH" in match_status:
+        label = 1
+    else:
+        label = -1
+    # Now append the feature vector + label to our data structures
     training_data.append(v)
-    labels.append(match_status)
+    labels.append(label)
 
 training.close()
 print("training loaded")
 clf.fit(training_data, labels)
 
-true_pos = 0
-false_pos = 0
-true_neg = 0
-false_neg = 0
+true_positives = 0
+false_positives = 0
+true_negatives = 0
+false_negatives = 0
+dataset_count = 0
+unknown = 0
+
 for line in test:
     seg = re.split(jumbo_pattern, line)
     pair1_json = seg[4]
@@ -65,24 +76,43 @@ for line in test:
 
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
-    v = f.getVector(l, r)
-    match_guess = clf.predict([v])
-    if match_guess == '?MATCH':
-        if match_guess == match_status:
-            true_pos += 1
+    dataset_count += 1
+    v = f.getVector(l, r, allFuncs=True)
+    match_vector = clf.predict_proba([v])
+    if "?MATCH" in match_status:
+        label = 1
+    if "?MISMATCH" in match_status:
+        label = -1
+    if match_vector[0][0] > 0.6:
+        match_guess = -1
+    if match_vector[0][1] > 0.6:
+        match_guess = 1
+    if match_vector[0][1] < 0.6 and match_vector[0][0] < 0.6:
+        unknown += 1
+        match_guess = 0
+    if match_guess == 1:
+        if match_guess == label:
+            true_positives += 1
         else:
-            false_pos += 1
-    else:
-        if match_guess == match_status:
-            true_neg += 1
+            false_positives += 1
+    elif match_guess == -1:
+        if match_guess == label:
+            true_negatives += 1
         else:
-            false_neg += 1
+            false_negatives += 1
 test.close()
 
-print("True positives: " + str(true_pos))
-print("False positives: " + str(false_pos))
-print("True negatives: " + str(true_neg))
-print("False negatives: " + str(false_neg))
-precision = float (true_pos)/(true_pos + false_pos)
-recall = float(true_pos)/(true_pos + false_neg)
-print ("Precision:",precision, "Recall:",recall)
+# Calculate end results
+end_time = datetime.datetime.now()
+diff_time = end_time - start_time
+precision = float (true_positives)/(true_positives + false_positives)
+recall = float(true_positives)/(true_positives + false_negatives)
+
+print("Precision:", precision)
+print("Recall:", recall)
+print("True positives:", true_positives)
+print("False positives:", false_positives)
+print("True negatives:", true_negatives)
+print("False negatives:", false_negatives)
+print("Unknown values:", unknown)
+print("Computation time:", str(diff_time.total_seconds()/60.0), " minutes")

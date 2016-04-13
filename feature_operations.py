@@ -12,6 +12,9 @@ import re
 
 pld = 'Product Long Description'
 psd = 'Product Short Description'
+bar_reg = r'[ \|\[\]]'
+
+
 
 #helper method
 def fetchSet(dict, key):
@@ -19,7 +22,7 @@ def fetchSet(dict, key):
         return []
     val = dict[key]
     if isinstance(val, str):
-        return [val]
+        return [val.lower()]
     else:
         return val
 
@@ -28,6 +31,22 @@ class FeatureGenerator:
         self.ie = InformationExtractor()
         self.parser = MyHtmlParser()
         self.syn_dict = self.ie.syn_dict
+
+        #ADJUST FUNCTIONS HERE TO KEEP LABELS
+
+        #no long description dictionary arguments
+        self.lr_functions = self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_segment_jaccard, self.product_name_jaccard, self.product_long_description_jaccard, self.product_short_description_jaccard,
+
+        #long dictionary arguments
+        self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.features_tfidf, self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard,
+
+
+        # FOR LOG REGRESSION
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_name_jaccard, self.product_name_tfidf, self.product_segment_jaccard, self.product_long_description_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf
+
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.category_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.limited_warranty_jaccard, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard
+
+
 
     #CHECKED
     def product_name_jaccard(self, l, r):
@@ -48,7 +67,7 @@ class FeatureGenerator:
 
     def is_stress_test(self, l, r):
         p1 = l.get('Product Name')
-        p2 = r.get('Proudct Name')
+        p2 = r.get('Product Name')
         if (p1 is not None and 'stress testing' in p1[0].lower()) or (p2 is not None and 'stress testing' in p2[0].lower()):
             return 1
         else:
@@ -76,7 +95,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -289,27 +307,38 @@ class FeatureGenerator:
 
     #CHECKED
     def brand_and_brand_name_sim(self, l, r, lld, rld):
-        p1 = l.get('Brand')
-        p2 = r.get('Brand')
-        if p1 is None and 'Brand Name' in l.keys():
-            p1 = l.get('Brand Name')
-        if p2 is None and 'Brand Name' in r.keys():
-            p2 = r.get('Brand Name')
-        if p1 is None and 'Brand' in lld.keys():
+        p1 = ''
+        p2 = ''
+        if 'Brand' in l:
+            p1 = l.get('Brand')[0]
+        if 'Brand' in r:
+            p2 = r.get('Brand')[0]
+        if p1 is '' and 'Brand Name' in l.keys():
+            p1 = l.get('Brand Name')[0]
+        if p2 is '' and 'Brand Name' in r.keys():
+            p2 = r.get('Brand Name')[0]
+        if p1 is '' and 'Brand' in lld.keys():
             p1 = lld.get('Brand')
-        if p2 is None and 'Brand' in rld.keys():
+        if p2 is '' and 'Brand' in rld.keys():
             p2 = rld.get('Brand')
-        if p1 is None and 'Brand Name' in lld.keys():
+        if p1 is '' and 'Brand Name' in lld.keys():
             p1 = lld.get('Brand Name')
-        if p2 is None and 'Brand Name' in rld.keys():
+        if p2 is '' and 'Brand Name' in rld.keys():
             p2 = rld.get('Brand Name')
-        # if p1 is None and p2 is None:
-        #     return 0.0
-        if p1 is None:
-            p1 = [""]
-        if p2 is None:
-            p2 = [""]
-        return py_stringmatching.simfunctions.jaro(p1[0].lower(), p2[0].lower())
+
+        #last attempt: try information extraction
+        if p1 is '':
+            p1 = self.ie.brand_from_string(l.get('Product Name')[0])
+        if p2 is '':
+            p2 = self.ie.brand_from_string(r.get('Product Name')[0])
+
+        #Standardize Extracted Brands
+        if p1 in self.ie.syn_dict:
+            p1 = self.ie.syn_dict[p1]
+        if p2 in self.ie.syn_dict:
+            p2 = self.ie.syn_dict[p2]
+
+        return py_stringmatching.simfunctions.jaro(p1.lower(), p2.lower())
 
     def limited_warranty_jaccard(self, l, r, lld, rld):
         p1_tokens = []
@@ -334,13 +363,19 @@ class FeatureGenerator:
         if p1 is None and 'Weight' in lld.keys():
             p1 = [lld.get('Weight')]
         if p2 is None and 'Weight' in rld.keys():
-            p2 = [rld.get('Weight')]     
+            p2 = [rld.get('Weight')]
+        if p1 is None and 'Weight (Approximate)' in l:
+            p1 = l.get('Weight (Approximate)')
+        if p2 is None and 'Weight (Approximate)' in r:
+            p2 = r.get('Weight (Approximate)')
+        if p1 is None and 'Weight (Approximate)' in lld.keys():
+            p1 = [lld.get('Weight (Approximate)')]
+        if p2 is None and 'Weight (Approximate)' in rld.keys():
+            p2 = [rld.get('Weight (Approximate)')]
         if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0].lower())
         if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0].lower())
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def width_jaccard(self, l, r, lld, rld):
@@ -356,8 +391,7 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def depth_jaccard(self, l, r, lld, rld):
@@ -390,7 +424,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
-    def features_jaccard(self, l, r, lld, rld):
+    def features_tfidf(self, l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
         p1 = l.get('Features')
@@ -400,29 +434,12 @@ class FeatureGenerator:
         if p2 is None and 'Features' in rld.keys():
             p2 = [rld.get('Features')]     
         if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
+            p1_tokens = re.split(bar_reg, p1[0])
         if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
-        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
-
-    def weight_approximate_jaccard(self, l, r, lld, rld):
-        p1_tokens = []
-        p2_tokens = []
-        p1 = l.get('Weight (Approximate)')
-        p2 = r.get('Weight (Approximate)')
-        if p1 is None and 'Weight (Approximate)' in lld.keys():
-            p1 = [lld.get('Weight (Approximate)')]
-        if p2 is None and 'Weight (Approximate)' in rld.keys():
-            p2 = [rld.get('Weight (Approximate)')]     
-        if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
-        if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        # if len(p1_tokens) == 0 and len(p2_tokens) == 0:
-        #     return 0.0
-        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+            p1_tokens = re.split(bar_reg, p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
 
     def product_line_jaccard(self, l, r, lld, rld):
         p1_tokens = []
@@ -481,11 +498,12 @@ class FeatureGenerator:
             p1 = [lld.get('Type')]
         if p2 is None and 'Type' in rld.keys():
             p2 = [rld.get('Type')]
-        reg = r'[ \|]'
         if p1 is not None:
-            p1_tokens = re.split(reg, p1[0])
+            p1_tokens = re.split(bar_reg, p1[0])
         if p2 is not None:
-            p2_tokens = re.split(reg, p2[0])
+            p2_tokens = re.split(bar_reg, p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def form_factor_jaccard(self, l, r, lld, rld):
@@ -516,8 +534,27 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+        p1_tokens = [x.lower() for x in p1_tokens]
+        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+
+    def category_sim(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('Category')
+        p2 = r.get('Category')
+        if p1 is None and 'Category' in lld.keys():
+            p1 = [lld.get('Category')]
+        if p2 is None and 'Category' in rld.keys():
+            p2 = [rld.get('Category')]
+        if p1 is not None:
+            p1_tokens = re.split(bar_reg, p1[0])
+        if p2 is not None:
+            p1_tokens = re.split(bar_reg, p2[0])
+
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+        
     def assembly_code_sim(self, l, r, lld, rld):
         p1 = l.get('Assembly Code')
         p2 = r.get('Assembly Code')
@@ -576,9 +613,7 @@ class FeatureGenerator:
             p2 = [""]
         y = max(len(p1),len(p2))
         if y > 0:
-            return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])/y
-        if p1 != "" or p2 != "":
-            return 1
+            return py_stringmatching.simfunctions.levenshtein(p1[0].lower(), p2[0].lower())/y
         return 0
 
     # This only appears in 27 tuples it's probably not actually useful
@@ -611,7 +646,19 @@ class FeatureGenerator:
         return r
 
 
-    def getVector(self, l, r):
+    def getVectorAttributes(self):
+        att = []
+        for func in self.lr_functions:
+            str = func.__name__
+            att.append(str)
+
+        # functions that do
+        for func in self.longd_functions:
+            str = func.__name__
+            att.append(str)
+        return att
+
+    def getVector(self, l, r, allFuncs=False):
         rld = {}
         lld = {}
         vector = []
@@ -635,13 +682,19 @@ class FeatureGenerator:
         if psd in r:
             r[psd] = [self.ie.text_from_html(r[psd][0])]
 
+        if allFuncs:
+            lr_functions = self.all_lr_functions
+            longd_functions = self.all_longd_functions
+        else:
+            lr_functions = self.lr_functions
+            longd_functions = self.longd_functions
         # functions that do not take in long description dictionaries
-        for func in self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_name_tfidf, self.big_text_jaccard, self.product_segment_jaccard:
+        for func in lr_functions:
             x = func(l, r)
             vector.append(x)
 
         # functions that do
-        for func in self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim, self.color_match, self.product_type_sim, self.manufacturer_part_number_jaccard, self.assembled_product_width_sim, self.assembled_product_length_sim, self.limited_warranty_jaccard, self.weight_approximate_jaccard, self.weight_jaccard, self.product_line_jaccard, self.screen_size_jaccard, self.width_jaccard, self.depth_jaccard, self.features_jaccard, self.product_series_jaccard, self.type_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.form_factor_jaccard, self.assembly_code_sim, self.model_levenshtein, self.product_model_levenshtein, self.operating_system_jaccard, self.device_type_sim:
+        for func in longd_functions:
             y = func(l, r, lld, rld)
             vector.append(y)
 
