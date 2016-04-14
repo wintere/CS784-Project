@@ -45,9 +45,9 @@ class FeatureGenerator:
 
 
         # FOR LOG REGRESSION
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_long_description_tfidf, self.product_name_jaccard,
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard,
 
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.category_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.category_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard,
 
 
 
@@ -661,7 +661,12 @@ class FeatureGenerator:
             p1 = [""]
         if p2 is None:
             p2 = [""]
-        return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])
+        y = max(len(p1),len(p2))
+        if y > 0:
+            return py_stringmatching.simfunctions.levenshtein(p1[0], p2[0])/y
+        if p1 != "" or p2 != "":
+            return 1
+        return 0
 
     def model_levenshtein(self, l, r, lld, rld):
         p1 = l.get('Model')
@@ -727,7 +732,7 @@ class FeatureGenerator:
         p2 = set()
         p1 = p1.union(fetchSet(l, dt), fetchSet(lld, dt), fetchSet(l, ds), fetchSet(lld, ds))
         p2 = p2.union(fetchSet(r, dt), fetchSet(rld, dt), fetchSet(r, ds), fetchSet(rld, ds))
-        r =  py_stringmatching.simfunctions.jaccard(p1, p2)
+        r =  py_stringmatching.simfunctions.monge_elkan(p1, p2)
         return r
 
 
@@ -773,6 +778,9 @@ class FeatureGenerator:
             l[psd] = [self.ie.text_from_html(l[psd][0])]
         if psd in r:
             r[psd] = [self.ie.text_from_html(r[psd][0])]
+
+        l = self.ie.brand_adjuster(l)
+        r = self.ie.brand_adjuster(r)
 
         if allFuncs:
             lr_functions = self.all_lr_functions

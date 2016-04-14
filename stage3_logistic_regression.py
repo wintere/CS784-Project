@@ -7,7 +7,7 @@ import sys
 from collections import defaultdict
 from feature_operations import FeatureGenerator
 from sklearn.linear_model import LogisticRegression
-
+from sklearn import cross_validation
 # # put the proper file path to the pairs source here
 if len(sys.argv) != 3:
     print("Usage: python stage3_decision_tree.py <training data filename> <full dataset filename>")
@@ -74,7 +74,8 @@ testing_size = 0
 # Open the file with the full dataset
 dataset_fp = sys.argv[2]
 dataset_fd = open(dataset_fp, mode='r', encoding="latin-1")
-
+testing_data = []
+testing_labels = []
 # Set up the training data
 print("Analyzing the testing dataset...");
 for line in dataset_fd:
@@ -88,11 +89,13 @@ for line in dataset_fd:
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
     v = f.getVector(l, r, allFuncs=True)
+    testing_data.append(v)
     match_vector = clf.predict_proba([v])
     if "?MATCH" in match_status:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
+    testing_labels.append(label)
     if match_vector[0][0] > 0.65:
         match_guess = -1
     if match_vector[0][1] > 0.65:
@@ -135,3 +138,5 @@ print("False negatives:", false_negatives)
 print("Unknown values:", unknown)
 print("Computation time:", str(diff_time.total_seconds()/60.0), " minutes")
 
+scores = cross_validation.cross_val_score(clf, testing_data, testing_labels, cv=5)
+print("Precision Average: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))

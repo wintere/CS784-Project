@@ -57,7 +57,23 @@ class InformationExtractor:
         except UserWarning:
             return description.lower()
 
-
+    # a cheap haaaack
+    def brand_adjuster(self, d, ld=False):
+        if ld:
+            for entry in ['Brand', 'Product Name', 'Manufacturer', 'Product Short Description', 'Product Long Description', 'Brand Name']:
+                if entry in d:
+                    cur = d.get(entry).lower()
+                    cur = cur.replace('cables to go', 'c2g')
+                    cur = cur.replace('startech.com', 'startech')
+                    d[entry] = cur
+        else:
+            for entry in ['Brand', 'Product Name', 'Manufacturer', 'Product Short Description', 'Product Long Description', 'Brand Name']:
+                if entry in d:
+                    cur = d.get(entry)[0].lower()
+                    cur = cur.replace('cables to go', 'c2g')
+                    cur = cur.replace('startech.com', 'startech')
+                    d[entry] = [cur]
+        return d
 
     def color_from_name(self, product_name):
         colors = []

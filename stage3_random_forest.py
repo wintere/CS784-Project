@@ -55,7 +55,7 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = ensemble.RandomForestClassifier()
+clf = ensemble.RandomForestClassifier(n_estimators=16, random_state=14)
 clf = clf.fit(training_data, labels)
 correct_guesses = 0
 guesses = 0
@@ -91,11 +91,11 @@ for line in dataset_fd:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
-    if match_vector[0][0] > 0.6:
+    if match_vector[0][0] > .73:
         match_guess = -1
-    if match_vector[0][1] > 0.6:
+    if match_vector[0][1] > 0.65:
         match_guess = 1
-    if match_vector[0][1] <= 0.6 and match_vector[0][0] <= 0.6:
+    if match_vector[0][1] <= 0.65 and match_vector[0][0] <= 0.73:
         unknown += 1
         match_guess = 0
     if match_guess == 1:
@@ -117,9 +117,7 @@ for line in dataset_fd:
     testing_size += 1
 dataset_fd.close()
 
-# scores = cross_validation.cross_val_score(clf, testing_data, testing_labels, cv=5, scoring='f1_weighted')
-# print("F1 Average: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-# Calculate end results
+
 end_time = datetime.datetime.now()
 diff_time = end_time - start_time
 precision = float (correct_guesses)/(guesses)
