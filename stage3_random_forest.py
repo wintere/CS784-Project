@@ -91,11 +91,11 @@ for line in dataset_fd:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
-    if match_vector[0][0] > .75:
+    if match_vector[0][0] > .71:
         match_guess = -1
-    if match_vector[0][1] > 0.65:
+    if match_vector[0][1] > 0.56:
         match_guess = 1
-    if match_vector[0][1] <= 0.65 and match_vector[0][0] <= 0.75:
+    if match_vector[0][1] <= 0.56 and match_vector[0][0] <= 0.71:
         unknown += 1
         match_guess = 0
     if match_guess == 1:
@@ -124,10 +124,11 @@ end_time = datetime.datetime.now()
 diff_time = end_time - start_time
 precision = float (correct_guesses)/(guesses)
 recall = float(correct_guesses)/(testing_size)
-
+f1 = 2 * float(precision * recall)/(precision + recall)
 # CSV stats
 print("Precision:", precision)
 print("Recall:", recall)
+print("F1:", f1)
 print("True positives:", true_positives)
 print("False positives:", false_positives)
 print("True negatives:", true_negatives)
