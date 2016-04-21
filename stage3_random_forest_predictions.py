@@ -55,7 +55,7 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a random forest classifier using the data passed in
-clf = ensemble.RandomForestClassifier(n_estimators=16, random_state=14)
+clf = ensemble.RandomForestClassifier(n_estimators=17, random_state=26)
 clf = clf.fit(training_data, labels)
 
 
@@ -89,11 +89,11 @@ for line in dataset_fd:
     match_vector = clf.predict_proba([v])
     
     # Make a prediction for this line based on match_vector
-    if match_vector[0][0] > .73:
+    if match_vector[0][0] > .74:
         match_guess = "MISMATCH"
     if match_vector[0][1] > 0.65:
         match_guess = "MATCH"
-    if match_vector[0][1] <= 0.65 and match_vector[0][0] <= 0.73:
+    if match_vector[0][1] <= 0.65 and match_vector[0][0] <= 0.74:
         match_guess = "UNKNOWN"
     predictions_fd.write(pairId + ", " + str(match_guess) + "\n")
     

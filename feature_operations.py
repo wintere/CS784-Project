@@ -65,8 +65,8 @@ class FeatureGenerator:
     def product_name_jaccard(self, l, r):
         p1 = l.get('Product Name')[0]
         p2 = r.get('Product Name')[0]
-        p1_tokens = cleanTokenize(p1)
-        p2_tokens = cleanTokenize(p2)
+        p1_tokens = tokenizeAndFilter(p1)
+        p2_tokens = tokenizeAndFilter(p2)
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -151,7 +151,7 @@ class FeatureGenerator:
         r_keys.extend(rld_keys)
         l_keys = [x.lower() for x in l_keys]
         r_keys = [x.lower() for x in r_keys]
-        return py_stringmatching.simfunctions.monge_elkan(l_keys, r_keys)
+        return py_stringmatching.simfunctions.jaccard(set(l_keys), set(r_keys))
 
 
     #CHECKED
