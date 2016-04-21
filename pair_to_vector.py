@@ -36,16 +36,19 @@ jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d
 # for each line (pair of tuples) in the file
 count = 0
 tuples = set()
-s = 0
-m = 0
+tra = 0
+te = 0
+
+pos=0
+pc = 0
+neg=0
+nc = 0
 # parser = MyHtmlParser()
 f = FeatureGenerator()
-parser = MyHtmlParser()
-
+a = f.getVectorAttributes(allFuncs=True)
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
-    parser.reset()
     # due to capturing groups we get more segments than we want
     id_string = seg[3]
     pair1_json = seg[4]
@@ -56,19 +59,39 @@ for line in fd:
 
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
-    if random.randint(0,12) == 1:
-        if count < 50:
-            l = json.loads(pair1_json)
-            r = json.loads(pair2_json)
-            v = f.getVector(l, r, allFuncs=True)
-            print(match_status)
-            # for i in range(len(v)):
-            #     print(a[i], ":", v[i], match_status)
-            count += 1
-        if count == 100:
-            break
+    # if tra == 15000:
+    #     te_f.write(line)
+    #     te += 1
+    # elif te == 5000:
+    #     tra_f.write(line)
+    #     tra += 1
+    # elif random.randint(0,1) == 1:
+    #     te_f.write(line)
+    #     te += 1
+    # else:
+    #     tra_f.write(line)
+    #     tra += 1
+    if random.randint(0,200) == 3:
+        l = json.loads(pair1_json)
+        r = json.loads(pair2_json)
+        v = f.getVector(l, r, allFuncs=True)
+        index = a.index('product_short_description_jaccard')
+        print(match_status, v[index])
+        if '?MATCH' in (match_status):
+            pos += v[index]
+            pc += 1
+        else:
+            neg += v[index]
+            nc += 1
+    # for i in range(len(v)):
+    #     print(a[i], ":", v[i], match_status)
+        count += 1
+    if count == 200:
+        break
 
+print(pos/pc, neg/nc)
 fd.close()
+
 
 
 #l and r are dictionaries

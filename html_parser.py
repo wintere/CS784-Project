@@ -14,11 +14,13 @@ class MyHtmlParser(HTMLParser):
                     self.last = value
                 elif value[0] == ':':
                     value = value[1:].strip()
-                    self.result[self.last] = value
+                    if len(self.last) < 50:
+                        self.result[self.last] = value
                     self.last = ""
                 elif value.count(':') == 1 and value[-1] != ':':
                     split = value.split(':', 1)
-                    self.result[split[0].strip()] = split[1].strip()
+                    if len(split[0].strip()) < 50:
+                        self.result[split[0].strip()] = split[1].strip()
 
 
 

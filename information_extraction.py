@@ -65,6 +65,9 @@ class InformationExtractor:
                     cur = d.get(entry).lower()
                     cur = cur.replace('cables to go', 'c2g')
                     cur = cur.replace('startech.com', 'startech')
+                    cur = cur.replace('pny technologies', 'pny')
+                    cur = cur.replace('everki usa inc', 'everki')
+                    cur = cur.replace('rubbermaid home', 'rubbermaid')
                     d[entry] = cur
         else:
             for entry in ['Brand', 'Product Name', 'Manufacturer', 'Product Short Description', 'Product Long Description', 'Brand Name']:
@@ -72,6 +75,9 @@ class InformationExtractor:
                     cur = d.get(entry)[0].lower()
                     cur = cur.replace('cables to go', 'c2g')
                     cur = cur.replace('startech.com', 'startech')
+                    cur = cur.replace('pny technologies', 'pny')
+                    cur = cur.replace('everki usa inc', 'everki')
+                    cur = cur.replace('rubbermaid home', 'rubbermaid')
                     d[entry] = [cur]
         return d
 
