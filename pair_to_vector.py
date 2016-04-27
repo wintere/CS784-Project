@@ -7,8 +7,16 @@ from collections import defaultdict
 import random
 from feature_operations import FeatureGenerator
 from html_parser import MyHtmlParser
+from sklearn import feature_extraction
+import pickle
 
-
+def cleanTokenize(string):
+    tokens = []
+    toks = re.split(r'[ \|\[\]_,\/\(\)\*\n\t\b\r\{\}\~\;\!\:]', string)
+    for i in toks:
+        if i != '' and i != '\n' and i != '-':
+            tokens.append(i.lower())
+    return(tokens)
 
  # put the proper file path to the pairs source here
 if len(sys.argv) != 2:
@@ -17,7 +25,7 @@ if len(sys.argv) != 2:
 
 # fetch page and split into tuples
 fp = sys.argv[1]
-fd = open(fp, mode='r', errors='ignore', encoding='ascii')
+fd = open(fp, mode='r', errors='ignore', encoding='utf-8')
 
 # tuple structure
 # pair1ID-pair2ID#source?pair1ID?{pair1.json}?pair2ID{pair2.json}match
@@ -39,10 +47,7 @@ tuples = set()
 tra = 0
 te = 0
 
-pos=0
-pc = 0
-neg=0
-nc = 0
+lds = []
 # parser = MyHtmlParser()
 f = FeatureGenerator()
 a = f.getVectorAttributes(allFuncs=True)
@@ -75,23 +80,24 @@ for line in fd:
         l = json.loads(pair1_json)
         r = json.loads(pair2_json)
         v = f.getVector(l, r, allFuncs=True)
-        index = a.index('product_short_description_jaccard')
-        print(match_status, v[index])
-        if '?MATCH' in (match_status):
-            pos += v[index]
-            pc += 1
-        else:
-            neg += v[index]
-            nc += 1
-    # for i in range(len(v)):
-    #     print(a[i], ":", v[i], match_status)
+        print(match_status)
         count += 1
+    # ld_text = ''
+    # rd_text = ''
+    # if "Product Long Description" in l:
+    #     ld = l['Product Long Description']
+    #     ld_text = f.ie.text_from_html(ld[0])
+    # if "Product Long Description" in r:
+    #     rd = r['Product Long Description']
+    #     rd_text = f.ie.text_from_html(rd[0])
+    # lds.append((ld_text.strip('\n') + ' ' + rd_text.strip('\n') + ' '))
+
     if count == 200:
         break
-
-print(pos/pc, neg/nc)
+    # for i in range(len(v)):
+    #     print(a[i], ":", v[i], match_status)
 fd.close()
 
-
-
-#l and r are dictionaries
+# cv = feature_extraction.text.TfidfVectorizer(encoding='utf-8', decode_error='ignore', tokenizer=cleanTokenize, vocabulary=None)
+# tfidf_d = cv.fit(lds).vocabulary_
+# pickle.dump(tfidf_d, open("tfidf_longd.p", "wb"))

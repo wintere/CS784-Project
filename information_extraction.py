@@ -8,6 +8,7 @@ import string
 import sys
 from collections import defaultdict
 from bs4 import BeautifulSoup
+import pickle
 
 class InformationExtractor:
 
@@ -41,6 +42,8 @@ class InformationExtractor:
         with open('colors.txt','r') as c_file:
             for c in c_file.readlines():
                 self.colors.append(c.strip('\n'))
+
+        self.longd_tfidf = pickle.load(open("tfidf_longd.p", "rb"))
 
     def text_from_html(self, description):
         if len(description) < 5:

@@ -5,17 +5,17 @@ import py_stringmatching.simfunctions
 from information_extraction import InformationExtractor
 from html_parser import MyHtmlParser
 import re
-
+import math
 
 pld = 'Product Long Description'
 psd = 'Product Short Description'
 bar_reg = r'[ \|\[\]]'
 
-stops = ['-', '.', '\n', '', '&', 'and','this','with','the', 'you']
+stops = ['-', '.', '\n', '', '&', 'and','this','with','the', 'you', 'to', 'a', 'an', 'or', 'is','are']
 
 def tokenizeAndFilter(string):
     tokens = []
-    toks = re.split(r'[ \|\[\]_,\/\(\)\*]', string)
+    toks = re.split(r'[ \|\[\]\_,\/\(\)\*\n\t\b\r\{\}\~\;\!\:]', string)
     for i in toks:
         if i not in stops:
             tokens.append(i.lower())
@@ -23,7 +23,7 @@ def tokenizeAndFilter(string):
 
 def cleanTokenize(string):
     tokens = []
-    toks = re.split(r'[ \|\[\]_,\/\(\)\*]', string)
+    toks = re.split(r'[ \|\[\]_,\/\(\)\*\n\t\b\r\{\}\~\;\!\:]', string)
     for i in toks:
         if i != '' and i != '\n' and i != '-':
             tokens.append(i.lower())
@@ -55,12 +55,43 @@ class FeatureGenerator:
 
 
         # FOR LOG REGRESSION
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard,
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf
 
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.features_tfidf, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference,
 
-
-
+    def impromptu_longd_tfidf(self, l, r):
+        p1 = l.get(pld)
+        p2 = r.get(pld)
+        tf_x = set()
+        tf_y = set()
+        if p1 is not None:
+            tf_x = set(cleanTokenize(p1[0]))
+        if p2 is not None:
+            tf_y = set(cleanTokenize(p2[0]))
+        total = tf_x.union(tf_y)
+        tfidf_d = self.ie.longd_tfidf
+        #modified badly from the py_stringmatching code :(
+        v_x_y = 0
+        v_x_2 = 0
+        v_y_2 = 0
+        for word in total:
+            v_x = 0
+            v_y = 0
+            if (word in tf_x) and (word in tfidf_d):
+                tfidf = tfidf_d[word]
+                if tfidf == 0:
+                    tfidf = 0.0001
+                v_x = math.log(tfidf)
+            if (word in tf_y) and (word in tfidf_d):
+                tfidf = tfidf_d[word]
+                if tfidf == 0:
+                    tfidf = 0.0001
+                v_y = math.log(tfidf)
+            v_x_y += v_x * v_y
+            v_x_2 += v_x * v_x
+            v_y_2 += v_y * v_y
+        ret = 0.0 if v_x_y == 0 else v_x_y / (math.sqrt(v_x_2) * math.sqrt(v_y_2))
+        return(ret)
     #CHECKED
     def product_name_jaccard(self, l, r):
         p1 = l.get('Product Name')[0]
@@ -123,7 +154,7 @@ class FeatureGenerator:
             p1_tokens = cleanTokenize(p1[0])
         if p2 is not None:
             p2_tokens = cleanTokenize(p2[0])
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens, dampen=True)
 
     #CHECKED
     def product_short_description_jaccard(self, l, r, lld, rld):
@@ -169,10 +200,10 @@ class FeatureGenerator:
         p1 = l.get('Product Long Description')
         p2 = r.get('Product Long Description')
         if p1 is not None:
-            p1_tokens = tokenizeAndFilter(p1[0])
+            p1_tokens = cleanTokenize(p1[0])
         if p2 is not None:
-            p2_tokens = tokenizeAndFilter(p2[0])
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+            p2_tokens = cleanTokenize(p2[0])
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens, dampen=True)
 
     #CHECKED
     def product_long_description_jaccard(self, l, r):
@@ -397,7 +428,7 @@ class FeatureGenerator:
             p2_tokens.extend(cleanTokenize(r.get(key)[0]))
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens, dampen=True)
 
     #CHECKED
     def brand_and_brand_name_sim(self, l, r, lld, rld):
@@ -522,7 +553,7 @@ class FeatureGenerator:
         p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
-    def features_tfidf(self, l, r, lld, rld):
+    def features_jaccard(self, l, r, lld, rld):
         p1_tokens = []
         p2_tokens = []
         p1 = l.get('Features')
@@ -537,7 +568,8 @@ class FeatureGenerator:
             p1_tokens = cleanTokenize(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens)
+        print(p1_tokens, p2_tokens)
+        return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_line_jaccard(self, l, r, lld, rld):
         p1_tokens = []

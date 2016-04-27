@@ -55,7 +55,7 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = ensemble.RandomForestClassifier(n_estimators=17, random_state=26)
+clf = ensemble.RandomForestClassifier(n_estimators=35, random_state=26)
 clf = clf.fit(training_data, labels)
 correct_guesses = 0
 guesses = 0
@@ -91,11 +91,11 @@ for line in dataset_fd:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
-    if match_vector[0][0] > .71:
+    if match_vector[0][0] > .63:
         match_guess = -1
-    if match_vector[0][1] > 0.56:
+    if match_vector[0][1] > 0.58:
         match_guess = 1
-    if match_vector[0][1] <= 0.56 and match_vector[0][0] <= 0.71:
+    if match_vector[0][1] <= 0.58 and match_vector[0][0] <= 0.63:
         unknown += 1
         match_guess = 0
     if match_guess == 1:
