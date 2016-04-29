@@ -1,8 +1,8 @@
-import datetime
 import re
 import json
 import sys
 import math
+import pickle
 
 def tf(word, blob):
     return blob.words.count(word) / len(blob.words)
@@ -36,12 +36,10 @@ def calcidf():
 
     # there might be a better way to do this than the split library...
     jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d+\?)'
-    product_count = 0
     product_names = []
     all_tokens = {}
-    start_time = datetime.datetime.now()
 
-    attribute = 'Product Long Description'
+    attribute = 'Product Name'
 
     for line in training_fd:
         # Split line into 3 important parts (tuple1, tuple2, label)
@@ -53,36 +51,35 @@ def calcidf():
         # Set up the feature vector for these tuples
         l = json.loads(pair1_json)
         r = json.loads(pair2_json)
-        # lname = l['Product Name']
-        # rname = r['Product Name']
 
         if attribute in l:
-            lpld = l[attribute]
-            ltokens = cleanTokenize(lpld[0])
+            lname = l[attribute]
+            ltokens = cleanTokenize(lname[0])
             product_names.append(ltokens)
             for t in ltokens:
                 if t in all_tokens:
                     all_tokens[t] += 1
                 else:
                     all_tokens[t] = 1
-            product_count += 1
 
         if attribute in r:
-            rpld = r[attribute]
-            rtokens = cleanTokenize(rpld[0])
+            rname = r[attribute]
+            rtokens = cleanTokenize(rname[0])
             product_names.append(rtokens)
             for t in rtokens:
                 if t in all_tokens:
                     all_tokens[t] += 1
                 else:
                     all_tokens[t] = 1
-            product_count += 1
 
     training_fd.close()
-    print("Finished setting up " + str(product_count) + " tuples!")
+    print("Finished setting up " + str(len(product_names)) + " tuples!")
 
     for token in all_tokens:
-        print(token, ":" , idf(token, product_names))
+        all_tokens[token] = idf(token, product_names)
+        # print(token, ":" , idf(token, product_names))
+
+    pickle.dump( all_tokens, open( "tfidf_pname.p", "wb" ) )
 
 if __name__ == "__main__":
     calcidf()
