@@ -55,7 +55,7 @@ class FeatureGenerator:
 
 
         # FOR LOG REGRESSION
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.weighted_product_name_sim
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.weighted_product_name_sim, self.product_name_tfidf,
 
         self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,
 
@@ -105,6 +105,36 @@ class FeatureGenerator:
         total = tf_x.union(tf_y)
         tfidf_d = self.ie.longd_tfidf
         #modified badly from the py_stringmatching code :(
+        v_x_y = 0
+        v_x_2 = 0
+        v_y_2 = 0
+        for word in total:
+            v_x = 0
+            v_y = 0
+            if (word in tf_x) and (word in tfidf_d):
+                tfidf = tfidf_d[word]
+                if tfidf == 0:
+                    tfidf = 0.0001
+                v_x = math.log(tfidf)
+            if (word in tf_y) and (word in tfidf_d):
+                tfidf = tfidf_d[word]
+                if tfidf == 0:
+                    tfidf = 0.0001
+                v_y = math.log(tfidf)
+            v_x_y += v_x * v_y
+            v_x_2 += v_x * v_x
+            v_y_2 += v_y * v_y
+        ret = 0.0 if v_x_y == 0 else v_x_y / (math.sqrt(v_x_2) * math.sqrt(v_y_2))
+        return(ret)
+
+    def product_name_tfidf(self, l, r):
+        p1 = l.get('Product Name')[0]
+        p2 = r.get('Product Name')[0]
+        tf_x = set(cleanTokenize(p1))
+        tf_y = set(cleanTokenize(p2))
+        total = tf_x.union(tf_y)
+        tfidf_d = self.ie.pname_tfidf
+        #reusing Erin's modified py_stringmatching =^.^=
         v_x_y = 0
         v_x_2 = 0
         v_y_2 = 0
