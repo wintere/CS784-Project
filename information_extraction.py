@@ -44,6 +44,7 @@ class InformationExtractor:
                 self.colors.append(c.strip('\n'))
 
         self.longd_tfidf = pickle.load(open("tfidf_longd.p", "rb"))
+        self.pname_tfidf = pickle.load(open("tfidf_pname.p", "rb"))
 
     def text_from_html(self, description):
         if len(description) < 5:
