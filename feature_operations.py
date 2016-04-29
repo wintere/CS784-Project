@@ -43,21 +43,55 @@ class FeatureGenerator:
     def __init__(self):
         self.ie = InformationExtractor()
         self.parser = MyHtmlParser()
+        #ADJUST FUNCTIONS HERE TO KEEP LABELS
         self.syn_dict = self.ie.syn_dict
 
-        #ADJUST FUNCTIONS HERE TO KEEP LABELS
 
         #no long description dictionary arguments
         self.lr_functions = self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_long_description_jaccard, self.product_name_jaccard,
 
         #long dictionary arguments
-        self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim,  self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard, self.product_short_description_jaccard,self.product_name_tfidf,
+        self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim,  self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard, self.product_short_description_jaccard,self.product_name_monge_elkan,
 
 
         # FOR LOG REGRESSION
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.weighted_product_name_sim
 
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference,
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,
+
+
+    def weighted_product_name_sim(self, l, r):
+        p1 = l.get('Product Name')
+        p2 = r.get('Product Name')
+        l_tok = []
+        r_tok = []
+        if p1 is not None:
+            l_tok = cleanTokenize(p1[0])
+        if p2 is not None:
+            r_tok = cleanTokenize(p2[0])
+        tfidf_d = self.ie.longd_tfidf
+        total = set(l_tok).union(set(r_tok))
+        v_x_y = 0
+        v_x_2 = 0
+        v_y_2 = 0
+        for word in total:
+            v_x = 0
+            v_y = 0
+            if (word in l_tok) and (word in tfidf_d):
+                tfidf = tfidf_d[word]
+                if tfidf == 0:
+                    tfidf = 0.0001
+                v_x = math.log(tfidf)
+            if (word in r_tok) and (word in tfidf_d):
+                tfidf = tfidf_d[word]
+                if tfidf == 0:
+                    tfidf = 0.0001
+                v_y = math.log(tfidf)
+            v_x_y += v_x * v_y
+            v_x_2 += v_x * v_x
+            v_y_2 += v_y * v_y
+        ret = 0.0 if v_x_y == 0 else v_x_y / (math.sqrt(v_x_2) * math.sqrt(v_y_2))
+        return ret
 
     def impromptu_longd_tfidf(self, l, r):
         p1 = l.get(pld)
@@ -92,6 +126,7 @@ class FeatureGenerator:
             v_y_2 += v_y * v_y
         ret = 0.0 if v_x_y == 0 else v_x_y / (math.sqrt(v_x_2) * math.sqrt(v_y_2))
         return(ret)
+
     #CHECKED
     def product_name_jaccard(self, l, r):
         p1 = l.get('Product Name')[0]
@@ -101,18 +136,18 @@ class FeatureGenerator:
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
-    def product_name_tfidf(self,l, r, lld, rld):
+    def product_name_monge_elkan(self,l, r, lld, rld):
         p1_tok = []
         p2_tok = []
         p1 = l.get('Product Name')[0].lower()
         p2 = r.get('Product Name')[0].lower()
-        p1_tok.extend(cleanTokenize(p1))
-        p2_tok.extend(cleanTokenize(p2))
+        p1_tok.extend(tokenizeAndFilter(p1))
+        p2_tok.extend(tokenizeAndFilter(p2))
         if 'Product Name' in lld:
-            p1_tok.extend(cleanTokenize(lld['Product Name'].lower()))
+            p1_tok.extend(tokenizeAndFilter(lld['Product Name'].lower()))
         if 'Product Name' in rld:
-            p2_tok.extend(cleanTokenize(rld['Product Name'].lower()))
-        return py_stringmatching.simfunctions.tfidf(p1_tok, p2_tok)
+            p2_tok.extend(tokenizeAndFilter(rld['Product Name'].lower()))
+        return py_stringmatching.simfunctions.monge_elkan(p1_tok, p2_tok)
 
     def key_length_difference(self, l, r, lld, rld):
         l_keys = list(l.keys())
@@ -392,6 +427,23 @@ class FeatureGenerator:
                 p2_tokens.extend(tokenizeAndFilter(rld.get(key)))
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+    def big_text_no_keys_monge_elkan(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1_keys = l.keys()
+        p2_keys = r.keys()
+        p1_more_keys = lld.keys()
+        p2_more_keys = rld.keys()
+        for key in p1_keys:
+            p1_tokens.extend(tokenizeAndFilter(l.get(key)[0]))
+        for key in p2_keys:
+            p2_tokens.extend(tokenizeAndFilter(r.get(key)[0]))
+        for key in p1_more_keys:
+            p1_tokens.extend(tokenizeAndFilter(lld.get(key)))
+        for key in p2_more_keys:
+            p2_tokens.extend(tokenizeAndFilter(rld.get(key)))
+        ret = py_stringmatching.simfunctions.monge_elkan(p1_tokens, p2_tokens)
+        return ret
 
     def all_key_value_jaccard(self, l, r, lld, rld):
         p1_tokens = []
@@ -793,6 +845,7 @@ class FeatureGenerator:
         p2 = p2.union(fetchSet(r, dt), fetchSet(rld, dt), fetchSet(r, ds), fetchSet(rld, ds))
         r =  py_stringmatching.simfunctions.monge_elkan(p1, p2)
         return r
+
 
 
     def getVectorAttributes(self, allFuncs=False):
