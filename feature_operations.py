@@ -51,13 +51,16 @@ class FeatureGenerator:
         self.lr_functions = self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_long_description_jaccard, self.product_name_jaccard,
 
         #long dictionary arguments
-        self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim,  self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard, self.product_short_description_jaccard,self.product_name_tfidf,
+        self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim,  self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard, self.product_short_description_jaccard,self.product_name_tfidf,self.product_name_measurements_jaccard
+        
 
 
         # FOR LOG REGRESSION
         self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf
 
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference,
+        #self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference,self.product_name_measurements_jaccard
+        
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf, self.product_name_tfidf, self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference,self.product_name_measurements_jaccard
 
     def impromptu_longd_tfidf(self, l, r):
         p1 = l.get(pld)
@@ -154,6 +157,7 @@ class FeatureGenerator:
             p1_tokens = cleanTokenize(p1[0])
         if p2 is not None:
             p2_tokens = cleanTokenize(p2[0])
+            
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens, dampen=True)
 
     #CHECKED
@@ -170,6 +174,11 @@ class FeatureGenerator:
             p1_tokens = tokenizeAndFilter(p1[0])
         if p2 is not None:
             p2_tokens = tokenizeAndFilter(p2[0])
+        
+        # If this field does not exist in one of the tuples, then this data is inconclusive. Return 0.5.
+        if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
+            return 0.5
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -227,6 +236,7 @@ class FeatureGenerator:
         p2_tokens.extend(fetchSet(rld, 'Product Type'))
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -245,6 +255,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -266,6 +277,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.monge_elkan(p1_tokens, p2_tokens)
 
     #STRING DISTANCE INSTEAD?
@@ -287,6 +299,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -412,6 +425,7 @@ class FeatureGenerator:
                 p2_tokens.extend(str(key + ':' + rld.get(key)))
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #CHECKED
@@ -480,6 +494,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def weight_jaccard(self, l, r, lld, rld):
@@ -503,6 +518,11 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0].lower())
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0].lower())
+            
+        # If this field does not exist in one of the tuples, then this data is inconclusive. Return 0.5.
+        if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
+            return 0.5
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def width_jaccard(self, l, r, lld, rld):
@@ -518,7 +538,7 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-
+            
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def depth_jaccard(self, l, r, lld, rld):
@@ -534,6 +554,7 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
+           
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_series_jaccard(self, l, r, lld, rld):
@@ -551,6 +572,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def features_jaccard(self, l, r, lld, rld):
@@ -586,6 +608,9 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
+        
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def screen_size_jaccard(self, l, r, lld, rld):
@@ -637,6 +662,7 @@ class FeatureGenerator:
             p2_tokens = cleanTokenize(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
+        
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def form_factor_jaccard(self, l, r, lld, rld):
@@ -793,6 +819,73 @@ class FeatureGenerator:
         p2 = p2.union(fetchSet(r, dt), fetchSet(rld, dt), fetchSet(r, ds), fetchSet(rld, ds))
         r =  py_stringmatching.simfunctions.monge_elkan(p1, p2)
         return r
+        
+    def product_name_measurements_jaccard(self,l, r, lld, rld):
+        p1_tok = []
+        p2_tok = []
+        p1 = l.get('Product Name')[0].lower()
+        p2 = r.get('Product Name')[0].lower()
+        p1_tok.extend(cleanTokenize(p1))
+        p2_tok.extend(cleanTokenize(p2))
+        if 'Product Name' in lld:
+            p1_tok.extend(cleanTokenize(lld['Product Name'].lower()))
+        if 'Product Name' in rld:
+            p2_tok.extend(cleanTokenize(rld['Product Name'].lower()))
+
+        measurement_units = ['khz', 'mhz', 'ghz', 'watt', 'nm', 'um', 'mm', 'cm', 'm', 'km', 'ft', 'in', 's', 'ms', 'mb', 'gb', 'tb', 'gb/s', 'mb/s', 'mbps', 'awg', 'a', 'w', 'g', 'lb', 'dba', 'cfm', 'rpm', 'amp', 'mah', 'watts']
+
+        p1_measurements = []
+        p2_measurements = []
+
+        # Determine which tokens (or token sets) represent measurements (ie. 9 ft, 2.4 ghz, 500 gb)
+        for index in range(0, len(p1_tok)):
+            token = p1_tok[index].lower()
+            # Look for measurements split across multiple tokens
+            if re.match("^[0-9\.]+$", token):
+                if index < len(p1_tok)-1:
+                    nextToken = str(p1_tok[index+1]).lower().replace(".", "")
+                    if nextToken in measurement_units:
+                        measurement_value = re.sub(r'\.[0]+', "", token) # Remove any trailing decimal points + 0s
+                        #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
+                        p1_measurements.append(str(measurement_value + " " + nextToken))
+            # Also look for measurements compacted into a single token
+            elif re.match("^[0-9\.]+(\s)*[a-z\./]+$", token):
+                measurement_data = re.match("^([0-9\.]+)[\s]*([a-z\./]+)$", token)
+                if str(measurement_data.groups(0)[1]) in measurement_units:
+                    measurement_value = re.sub(r'\.[0]+', "", measurement_data.groups(0)[0]) # Remove any trailing decimal points + 0s
+                    #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
+                    p1_measurements.append(str(measurement_value) + " " + str(measurement_data.groups(0)[1]))
+        for index in range(0, len(p2_tok)):
+            token = p2_tok[index]
+            # Look for measurements split across multiple tokens
+            if re.match("^[0-9\.]+$", token):
+                if index < len(p2_tok)-1:
+                    nextToken = str(p2_tok[index+1]).lower().replace(".", "")
+                    if nextToken in measurement_units:
+                        measurement_value = re.sub(r'\.[0]+', "", token) # Remove any trailing decimal points + 0s
+                        #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
+                        p2_measurements.append(str(measurement_value + " " + nextToken))
+            # Also look for measurements compacted into a single token
+            elif re.match("^[0-9\.]+(\s)*[a-z\./]+$", token):
+                measurement_data = re.match("^([0-9\.]+)[\s]*([a-z\./]+)$", token)
+                if str(measurement_data.groups(0)[1]) in measurement_units:
+                    measurement_value = re.sub(r'\.[0]+', "", measurement_data.groups(0)[0]) # Remove any trailing decimal points + 0s
+                    #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
+                    p2_measurements.append(str(measurement_value) + " " + str(measurement_data.groups(0)[1]))
+        
+        jaccard_value = py_stringmatching.simfunctions.jaccard(p1_measurements, p2_measurements)
+        
+        # If only one tuple returned valid measurements, return 1 (since this is inconclusive)
+        if (p1_measurements and not p2_measurements) or (p2_measurements and not p1_measurements):
+            jaccard_value = 0.5
+        
+        #print("P1 measurements: " + str(p1_measurements))
+        #print("P2 measurements: " + str(p2_measurements))
+        #print("Jaccard: " + str(jaccard_value) + "\n\n\n")
+        
+        return jaccard_value
+
+
 
 
     def getVectorAttributes(self, allFuncs=False):
