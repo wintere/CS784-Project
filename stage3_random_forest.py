@@ -91,11 +91,11 @@ for line in dataset_fd:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
-    if match_vector[0][0] > .63:
+    if match_vector[0][0] > 0.61:
         match_guess = -1
     if match_vector[0][1] > 0.58:
         match_guess = 1
-    if match_vector[0][1] <= 0.58 and match_vector[0][0] <= 0.63:
+    if match_vector[0][1] <= 0.58 and match_vector[0][0] <= 0.61:
         unknown += 1
         match_guess = 0
     if match_guess == 1:
@@ -103,7 +103,7 @@ for line in dataset_fd:
             true_positives += 1
             correct_guesses += 1
         else:
-            #print("FALSE POS:", "L\n", pair1_json, "\nR\n",pair2_json)
+            # print("FALSE POS:", "L\n", pair1_json, "\nR\n",pair2_json)
             false_positives += 1
         guesses += 1
     elif match_guess == -1:
@@ -111,7 +111,7 @@ for line in dataset_fd:
             true_negatives += 1
             correct_guesses += 1
         else:
-            #print("FALSE NEG:", "L\n", pair1_json, "R\n", pair2_json)
+            # print("FALSE NEG:", "L\n", pair1_json, "R\n", pair2_json)
             false_negatives += 1
         guesses += 1
     testing_data.append(v)
