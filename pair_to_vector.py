@@ -46,11 +46,10 @@ count = 0
 tuples = set()
 tra = 0
 te = 0
-
 lds = []
-# parser = MyHtmlParser()
 f = FeatureGenerator()
 a = f.getVectorAttributes(allFuncs=True)
+lines = []
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
@@ -60,7 +59,7 @@ for line in fd:
     pair2_id = seg[6]
     pair2_json = seg[8]
     match_status = seg[9]
-
+    lines.append(line)
 
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
@@ -82,6 +81,8 @@ for line in fd:
         v = f.getVector(l, r, allFuncs=True)
         print(match_status)
         count += 1
+    if count == 200:
+        break
     # ld_text = ''
     # rd_text = ''
     # if "Product Long Description" in l:
@@ -92,8 +93,6 @@ for line in fd:
     #     rd_text = f.ie.text_from_html(rd[0])
     # lds.append((ld_text.strip('\n') + ' ' + rd_text.strip('\n') + ' '))
 
-    if count == 200:
-        break
     # for i in range(len(v)):
     #     print(a[i], ":", v[i], match_status)
 fd.close()
