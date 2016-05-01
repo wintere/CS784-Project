@@ -56,42 +56,9 @@ class FeatureGenerator:
 
 
         # FOR LOG REGRESSION
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.weighted_product_name_sim, self.product_name_tfidf,
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements,
 
         self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard
-
-    def weighted_product_name_sim(self, l, r):
-        p1 = l.get('Product Name')
-        p2 = r.get('Product Name')
-        l_tok = []
-        r_tok = []
-        if p1 is not None:
-            l_tok = cleanTokenize(p1[0])
-        if p2 is not None:
-            r_tok = cleanTokenize(p2[0])
-        tfidf_d = self.ie.longd_tfidf
-        total = set(l_tok).union(set(r_tok))
-        v_x_y = 0
-        v_x_2 = 0
-        v_y_2 = 0
-        for word in total:
-            v_x = 0
-            v_y = 0
-            if (word in l_tok) and (word in tfidf_d):
-                tfidf = tfidf_d[word]
-                if tfidf == 0:
-                    tfidf = 0.0001
-                v_x = math.log(tfidf)
-            if (word in r_tok) and (word in tfidf_d):
-                tfidf = tfidf_d[word]
-                if tfidf == 0:
-                    tfidf = 0.0001
-                v_y = math.log(tfidf)
-            v_x_y += v_x * v_y
-            v_x_2 += v_x * v_x
-            v_y_2 += v_y * v_y
-        ret = 0.0 if v_x_y == 0 else v_x_y / (math.sqrt(v_x_2) * math.sqrt(v_y_2))
-        return ret
 
     def impromptu_longd_tfidf(self, l, r):
         p1 = l.get(pld)
@@ -415,14 +382,13 @@ class FeatureGenerator:
         l_name = l.get('Product Name')[0]
         l_color = l_color.union(self.ie.color_from_name(l_name))
         r_name = r.get('Product Name')[0]
-        r_color = r_color.union((self.ie.color_from_name(r_name)))
-
+        r_color = r_color.union(self.ie.color_from_name(r_name))
         if 'Color' in lld:
             l_color = l_color.union(fetchSet(lld, 'Color'))
         if 'Color' in rld:
             r_color = r_color.union(fetchSet(rld, 'Color'))
-        l_color = [x.lower() for x in l_color]
-        r_color = [x.lower() for x in r_color]
+        l_color = set([x.lower() for x in l_color])
+        r_color = set([x.lower() for x in r_color])
         return py_stringmatching.simfunctions.jaccard(l_color, r_color)
 
 
@@ -669,7 +635,6 @@ class FeatureGenerator:
             p1_tokens = cleanTokenize(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        print(p1_tokens, p2_tokens)
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_line_jaccard(self, l, r, lld, rld):
@@ -687,9 +652,9 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        
-        
-        
+
+
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def screen_size_jaccard(self, l, r, lld, rld):
@@ -866,7 +831,7 @@ class FeatureGenerator:
         if y > 0:
             return py_stringmatching.simfunctions.levenshtein(p1[0].lower(), p2[0].lower())/y
         if p1 != "" or p2 != "":
-            return 1
+            return 0.5
         return 0
 
     # This only appears in 27 tuples it's probably not actually useful
@@ -885,7 +850,7 @@ class FeatureGenerator:
         if y > 0:
             return py_stringmatching.simfunctions.levenshtein(p1[0].lower(), p2[0].lower())/y
         if p1 != "" or p2 != "":
-            return 1
+            return 0.5
         return 0
 
     def device_type_sim(self, l, r, lld, rld):
@@ -898,74 +863,41 @@ class FeatureGenerator:
         p2 = p2.union(fetchSet(r, dt), fetchSet(rld, dt), fetchSet(r, ds), fetchSet(rld, ds))
         r =  py_stringmatching.simfunctions.monge_elkan(p1, p2)
         return r
-        
+
+    def product_long_description_measurements(self, l, r):
+        p1_tok = []
+        p2_tok = []
+        p1 = l.get(pld)
+        p2 = r.get(pld)
+        if p1 is not None:
+            p1_tok.extend(cleanTokenize(p1[0]))
+        if p2 is not None:
+            p2_tok.extend(cleanTokenize(p2[0]))
+
+        p1_measurements = set(self.ie.unitsFromString(p1_tok))
+        p2_measurements = set(self.ie.unitsFromString(p2_tok))
+
+        jaccard_value = py_stringmatching.simfunctions.jaccard(p1_measurements, p2_measurements)
+        # If only one tuple returned valid measurements, return 0.5 (since this is inconclusive)
+        if (p1_measurements and not p2_measurements) or (p2_measurements and not p1_measurements):
+            jaccard_value = 0.5
+        return jaccard_value
+
     def product_name_measurements_jaccard(self,l, r, lld, rld):
         p1_tok = []
         p2_tok = []
-        p1 = l.get('Product Name')[0].lower()
-        p2 = r.get('Product Name')[0].lower()
+        p1 = l.get('Product Name')[0]
+        p2 = r.get('Product Name')[0]
         p1_tok.extend(cleanTokenize(p1))
         p2_tok.extend(cleanTokenize(p2))
-        if 'Product Name' in lld:
-            p1_tok.extend(cleanTokenize(lld['Product Name'].lower()))
-        if 'Product Name' in rld:
-            p2_tok.extend(cleanTokenize(rld['Product Name'].lower()))
 
-        measurement_units = ['khz', 'mhz', 'ghz', 'watt', 'nm', 'um', 'mm', 'cm', 'm', 'km', 'ft', 'in', 's', 'ms', 'mb', 'gb', 'tb', 'gb/s', 'mb/s', 'mbps', 'awg', 'a', 'w', 'g', 'lb', 'dba', 'cfm', 'rpm', 'amp', 'mah', 'watts']
-
-        p1_measurements = []
-        p2_measurements = []
-
-        # Determine which tokens (or token sets) represent measurements (ie. 9 ft, 2.4 ghz, 500 gb)
-        for index in range(0, len(p1_tok)):
-            token = p1_tok[index].lower()
-            # Look for measurements split across multiple tokens
-            if re.match("^[0-9\.]+$", token):
-                if index < len(p1_tok)-1:
-                    nextToken = str(p1_tok[index+1]).lower().replace(".", "")
-                    if nextToken in measurement_units:
-                        measurement_value = re.sub(r'\.[0]+', "", token) # Remove any trailing decimal points + 0s
-                        #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
-                        p1_measurements.append(str(measurement_value + " " + nextToken))
-            # Also look for measurements compacted into a single token
-            elif re.match("^[0-9\.]+(\s)*[a-z\./]+$", token):
-                measurement_data = re.match("^([0-9\.]+)[\s]*([a-z\./]+)$", token)
-                if str(measurement_data.groups(0)[1]) in measurement_units:
-                    measurement_value = re.sub(r'\.[0]+', "", measurement_data.groups(0)[0]) # Remove any trailing decimal points + 0s
-                    #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
-                    p1_measurements.append(str(measurement_value) + " " + str(measurement_data.groups(0)[1]))
-        for index in range(0, len(p2_tok)):
-            token = p2_tok[index]
-            # Look for measurements split across multiple tokens
-            if re.match("^[0-9\.]+$", token):
-                if index < len(p2_tok)-1:
-                    nextToken = str(p2_tok[index+1]).lower().replace(".", "")
-                    if nextToken in measurement_units:
-                        measurement_value = re.sub(r'\.[0]+', "", token) # Remove any trailing decimal points + 0s
-                        #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
-                        p2_measurements.append(str(measurement_value + " " + nextToken))
-            # Also look for measurements compacted into a single token
-            elif re.match("^[0-9\.]+(\s)*[a-z\./]+$", token):
-                measurement_data = re.match("^([0-9\.]+)[\s]*([a-z\./]+)$", token)
-                if str(measurement_data.groups(0)[1]) in measurement_units:
-                    measurement_value = re.sub(r'\.[0]+', "", measurement_data.groups(0)[0]) # Remove any trailing decimal points + 0s
-                    #print("Token=" + str(token) + ", Measurement value=" + str(measurement_value))
-                    p2_measurements.append(str(measurement_value) + " " + str(measurement_data.groups(0)[1]))
-        
-        jaccard_value = py_stringmatching.simfunctions.jaccard(p1_measurements, p2_measurements)
-        
-        # If only one tuple returned valid measurements, return 1 (since this is inconclusive)
-        if (p1_measurements and not p2_measurements) or (p2_measurements and not p1_measurements):
+        p1_units = set(self.ie.unitsFromString(p1_tok))
+        p2_units = set(self.ie.unitsFromString(p2_tok))
+        jaccard_value = py_stringmatching.simfunctions.jaccard(p1_units, p2_units)
+        # If only one tuple returned valid units, return 0.5 (since this is inconclusive)
+        if (p1_units and not p2_units) or (p2_units and not p1_units):
             jaccard_value = 0.5
-        
-        #print("P1 measurements: " + str(p1_measurements))
-        #print("P2 measurements: " + str(p2_measurements))
-        #print("Jaccard: " + str(jaccard_value) + "\n\n\n")
-        
         return jaccard_value
-
-
-
 
 
     def getVectorAttributes(self, allFuncs=False):

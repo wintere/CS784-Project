@@ -39,7 +39,7 @@ def calcidf():
     product_names = []
     all_tokens = {}
 
-    attribute = 'Product Name'
+    attribute = 'Product Short Description'
 
     for line in training_fd:
         # Split line into 3 important parts (tuple1, tuple2, label)
@@ -79,7 +79,9 @@ def calcidf():
         all_tokens[token] = idf(token, product_names)
         # print(token, ":" , idf(token, product_names))
 
-    pickle.dump( all_tokens, open( "tfidf_pname.p", "wb" ) )
+
+    pickle.dump(all_tokens, open("tfidf_sd.p", "wb"))
+    print("DONE")
 
 if __name__ == "__main__":
     calcidf()

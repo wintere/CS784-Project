@@ -144,3 +144,27 @@ class InformationExtractor:
                     chosen = candidate
 
         return chosen.lower()
+
+    #moved from feature_operations for better modularity
+    def unitsFromString(self, tokens):
+        measurement_units = ['khz', 'mhz', 'ghz', 'watt', 'nm', 'um', 'mm', 'cm', 'm', 'km', 'ft', 'in', 's', 'ms', 'mb', 'gb', 'tb', 'gb/s', 'mb/s', 'mbps', 'awg', 'a', 'w', 'g', 'lb', 'dba', 'cfm', 'rpm', 'amp', 'mah', 'watts']
+        units = []
+        for index in range(0, len(tokens)):
+            token = tokens[index].lower()
+            # Look for units split across multiple tokens
+            if re.match("^[0-9\.]+$", token):
+                if index < len(tokens) - 1:
+                    nextToken = str(tokens[index + 1]).lower().replace(".", "")
+                    if nextToken in measurement_units:
+                        unit_value = re.sub(r'\.[0]+', "", token)  # Remove any trailing decimal points + 0s
+                        # print("Token=" + str(token) + ", unit value=" + str(unit_value))
+                        units.append(str(unit_value + " " + nextToken))
+            # Also look for units compacted into a single token
+            elif re.match("^[0-9\.]+(\s)*[a-z\./]+$", token):
+                unit_data = re.match("^([0-9\.]+)[\s]*([a-z\./]+)$", token)
+                if str(unit_data.groups(0)[1]) in measurement_units:
+                    unit_value = re.sub(r'\.[0]+', "",
+                                               unit_data.groups(0)[0])  # Remove any trailing decimal points + 0s
+                    # print("Token=" + str(token) + ", unit value=" + str(unit_value))
+                    units.append(str(unit_value) + " " + str(unit_data.groups(0)[1]))
+        return units

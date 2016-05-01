@@ -76,7 +76,7 @@ for line in fd:
     # else:
     #     tra_f.write(line)
     #     tra += 1
-    if random.randint(0,200) == 3:
+    if random.randint(0,201) == 3:
         l = json.loads(pair1_json)
         r = json.loads(pair2_json)
         v = f.getVector(l, r, allFuncs=True)
