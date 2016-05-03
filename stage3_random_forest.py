@@ -91,11 +91,11 @@ for line in dataset_fd:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
-    if match_vector[0][0] > 0.63:
+    if match_vector[0][0] > 0.62:
         match_guess = -1
-    if match_vector[0][1] > 0.57:
+    if match_vector[0][1] > 0.54:
         match_guess = 1
-    if match_vector[0][1] <= 0.57 and match_vector[0][0] <= 0.63:
+    if match_vector[0][1] <= 0.54 and match_vector[0][0] <= 0.62:
         unknown += 1
         match_guess = 0
     if match_guess == 1:
