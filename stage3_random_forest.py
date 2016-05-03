@@ -37,7 +37,8 @@ for line in training_fd:
     pair1_json = seg[4]
     pair2_json = seg[8]
     match_status = seg[9]
-    
+    pair1_json = pair1_json.lower()
+    pair2_json = pair2_json.lower()
     # Set up the feature vector for these tuples
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
@@ -69,7 +70,7 @@ testing_size = 0
 # Open the file with the full dataset
 dataset_fp = sys.argv[2]
 dataset_fd = open(dataset_fp, mode='r', encoding="ascii", errors='ignore')
-
+lg = open('lg2.txt', mode='w')
 # Set up the training data
 testing_data = []
 testing_labels = []
@@ -80,7 +81,8 @@ for line in dataset_fd:
     pair1_json = seg[4]
     pair2_json = seg[8]
     match_status = seg[9]
-    
+    pair1_json = pair1_json.lower()
+    pair2_json = pair2_json.lower()
     # Set up the feature vector for these tuples
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
@@ -103,7 +105,9 @@ for line in dataset_fd:
             true_positives += 1
             correct_guesses += 1
         else:
-            # print("FALSE POS:", "L\n", pair1_json, "\nR\n",pair2_json)
+            lg.write("FALSE POS:" + "L\n" +  pair1_json + "\nR\n" + pair2_json)
+            lg.write(str(match_vector))
+            lg.write("Parsed: " +  str(l) + "\n" + str(r))
             false_positives += 1
         guesses += 1
     elif match_guess == -1:
@@ -111,14 +115,16 @@ for line in dataset_fd:
             true_negatives += 1
             correct_guesses += 1
         else:
-            # print("FALSE NEG:", "L\n", pair1_json, "R\n", pair2_json)
+            lg.write("FALSE NEG:" + "L\n" +  pair1_json + "R\n" + pair2_json)
+            lg.write(str(match_vector))
+            lg.write("Parsed: " +  str(l) + "\n" + str(r))
             false_negatives += 1
         guesses += 1
     testing_data.append(v)
     testing_labels.append(label)
     testing_size += 1
 dataset_fd.close()
-
+lg.close()
 
 end_time = datetime.datetime.now()
 diff_time = end_time - start_time

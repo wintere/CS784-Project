@@ -60,6 +60,8 @@ for line in fd:
     pair2_json = seg[8]
     match_status = seg[9]
     lines.append(line)
+    pair1_json = pair1_json.lower()
+    pair2_json = pair2_json.lower()
 
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
@@ -80,6 +82,7 @@ for line in fd:
         r = json.loads(pair2_json)
         v = f.getVector(l, r, allFuncs=True)
         print(match_status)
+        print(v)
         count += 1
     if count == 200:
         break

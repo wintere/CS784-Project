@@ -63,7 +63,7 @@ class InformationExtractor:
     # a cheap haaaack
     def brand_adjuster(self, d, ld=False):
         if ld:
-            for entry in ['Brand', 'Product Name', 'Manufacturer', 'Product Short Description', 'Product Long Description', 'Brand Name']:
+            for entry in ['brand', 'product name', 'manufacturer', 'product short description', 'product long description', 'brand name']:
                 if entry in d:
                     cur = d.get(entry).lower()
                     cur = cur.replace('cables to go', 'c2g')
@@ -73,7 +73,7 @@ class InformationExtractor:
                     cur = cur.replace('rubbermaid home', 'rubbermaid')
                     d[entry] = cur
         else:
-            for entry in ['Brand', 'Product Name', 'Manufacturer', 'Product Short Description', 'Product Long Description', 'Brand Name']:
+            for entry in ['brand', 'product name', 'manufacturer', 'product short description', 'product long description', 'brand name']:
                 if entry in d:
                     cur = d.get(entry)[0].lower()
                     cur = cur.replace('cables to go', 'c2g')
