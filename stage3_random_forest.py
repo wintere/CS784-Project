@@ -70,7 +70,7 @@ testing_size = 0
 # Open the file with the full dataset
 dataset_fp = sys.argv[2]
 dataset_fd = open(dataset_fp, mode='r', encoding="ascii", errors='ignore')
-lg = open('lg2.txt', mode='w')
+
 # Set up the training data
 testing_data = []
 testing_labels = []
@@ -105,9 +105,8 @@ for line in dataset_fd:
             true_positives += 1
             correct_guesses += 1
         else:
-            lg.write("FALSE POS:" + "L\n" +  pair1_json + "\nR\n" + pair2_json)
-            lg.write(str(match_vector))
-            lg.write("Parsed: " +  str(l) + "\n" + str(r))
+            print("FALSE POS:", "L\n", pair1_json, "\nR\n",pair2_json)
+            print(match_vector)
             false_positives += 1
         guesses += 1
     elif match_guess == -1:
@@ -115,16 +114,15 @@ for line in dataset_fd:
             true_negatives += 1
             correct_guesses += 1
         else:
-            lg.write("FALSE NEG:" + "L\n" +  pair1_json + "R\n" + pair2_json)
-            lg.write(str(match_vector))
-            lg.write("Parsed: " +  str(l) + "\n" + str(r))
+            print("FALSE NEG:", "L\n", pair1_json, "R\n", pair2_json)
+            print(match_vector)
             false_negatives += 1
         guesses += 1
     testing_data.append(v)
     testing_labels.append(label)
     testing_size += 1
 dataset_fd.close()
-lg.close()
+
 
 end_time = datetime.datetime.now()
 diff_time = end_time - start_time
