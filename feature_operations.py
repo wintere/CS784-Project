@@ -73,7 +73,7 @@ class FeatureGenerator:
 
 
         #no long description dictionary arguments
-        self.lr_functions = self.is_stress_test, self.product_long_description_tfidf, self.big_text_tfidf, self.product_long_description_jaccard, self.product_name_jaccard,
+        self.lr_functions = self.product_long_description_tfidf, self.big_text_tfidf, self.product_long_description_jaccard, self.product_name_jaccard,
 
         #long dictionary arguments
         self.longd_functions = self.long_descript_key_sim, self.total_key_similarity, self.color_match, self.manufacturer_jaccard, self.brand_and_brand_name_sim,  self.category_sim, self.assembled_product_length_sim, self.assembled_product_width_sim, self.product_line_jaccard, self.model_levenshtein, self.weight_jaccard,self.depth_jaccard, self.product_short_description_jaccard,self.product_name_monge_elkan,self.product_name_measurements_jaccard
@@ -81,7 +81,7 @@ class FeatureGenerator:
 
 
         # for log regression
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.is_stress_test, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements, self.big_text_shared_keys_tfidf,
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements, self.big_text_shared_keys_tfidf,
         self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard, self.conditionmatch, self.big_text_overlap_coeffecient, self.product_segment_jaccard
 
 
@@ -135,15 +135,6 @@ class FeatureGenerator:
         rld_keys = list(rld.keys())
         if len(lld_keys) > 0 or len(rld_keys) > 0:
             return (abs(len(lld_keys) - len(rld_keys)))/(len(lld_keys) + len(rld_keys))
-        else:
-            return 0
-
-
-    def is_stress_test(self, l, r):
-        p1 = l.get('product name')
-        p2 = r.get('product name')
-        if (p1 is not None and 'stress testing' in p1[0].lower()) or (p2 is not None and 'stress testing' in p2[0].lower()):
-            return 1
         else:
             return 0
 

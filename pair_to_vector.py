@@ -50,6 +50,8 @@ lds = []
 f = FeatureGenerator()
 a = f.getVectorAttributes(allFuncs=True)
 lines = []
+s = 0
+k = 0
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
@@ -62,7 +64,11 @@ for line in fd:
     lines.append(line)
     pair1_json = pair1_json.lower()
     pair2_json = pair2_json.lower()
-
+    if ('refurbished' in pair1_json and 'refurbished' not in pair2_json) or ('refurbished' in pair2_json and 'refurbished' not in pair1_json):
+        if (match_status) == "?MATCH":
+            print(pair1_json, '\n', pair2_json, '\n')
+            k+= 1
+        s += 1
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
     # if tra == 15000:
@@ -77,15 +83,15 @@ for line in fd:
     # else:
     #     tra_f.write(line)
     #     tra += 1
-    if random.randint(0,201) == 3:
-        l = json.loads(pair1_json)
-        r = json.loads(pair2_json)
-        v = f.getVector(l, r, allFuncs=True)
-        print(match_status)
-        print(v)
-        count += 1
-    if count == 200:
-        break
+    # if random.randint(0,201) == 3:
+    #     l = json.loads(pair1_json)
+    #     r = json.loads(pair2_json)
+    #     v = f.getVector(l, r, allFuncs=True)
+    #     print(match_status)
+    #     print(v)
+    #     count += 1
+    # if count == 200:
+    #     break
     # ld_text = ''
     # rd_text = ''
     # if "Product Long Description" in l:
@@ -99,6 +105,7 @@ for line in fd:
     # for i in range(len(v)):
     #     print(a[i], ":", v[i], match_status)
 fd.close()
+print("ERROR:", k/s)
 
 # cv = feature_extraction.text.TfidfVectorizer(encoding='utf-8', decode_error='ignore', tokenizer=cleanTokenize, vocabulary=None)
 # tfidf_d = cv.fit(lds).vocabulary_

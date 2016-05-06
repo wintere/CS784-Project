@@ -16,7 +16,7 @@ if len(sys.argv) != 3:
 
 # fetch page and split into tuples
 training_fp = sys.argv[1]
-training_fd = open(training_fp, mode='r', encoding="ascii", errors='ignore')
+training_fd = open(training_fp, mode='r', encoding="utf-8", errors='ignore')
 
 # there might be a better way to do this than the split library...
 jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d+\?)'
@@ -48,9 +48,10 @@ for line in training_fd:
         label = 1
     else:
         label = -1
-    training_data.append(v)
-    labels.append(label)
-    training_samples += 1
+    if not('stress testing' in pair1_json or 'stress testing' in pair2_json):
+        training_data.append(v)
+        labels.append(label)
+        training_samples += 1
     
 training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
@@ -69,7 +70,7 @@ testing_size = 0
 
 # Open the file with the full dataset
 dataset_fp = sys.argv[2]
-dataset_fd = open(dataset_fp, mode='r', encoding="ascii", errors='ignore')
+dataset_fd = open(dataset_fp, mode='r', encoding="utf-8", errors='ignore')
 
 # Set up the training data
 testing_data = []
@@ -93,20 +94,24 @@ for line in dataset_fd:
         label = 1
     if "?MISMATCH" in match_status:
         label = -1
-    if match_vector[0][0] > 0.62:
+    if match_vector[0][0] > 0.54:
         match_guess = -1
     if match_vector[0][1] > 0.54:
         match_guess = 1
-    if match_vector[0][1] <= 0.54 and match_vector[0][0] <= 0.62:
+    if match_vector[0][1] <= 0.54 and match_vector[0][0] <= 0.54:
         unknown += 1
         match_guess = 0
+
+    if ('stress testing' in pair1_json or 'stress testing' in pair2_json):
+        match_guess = -1
+
     if match_guess == 1:
         if match_guess == label:
             true_positives += 1
             correct_guesses += 1
         else:
-            print("FALSE POS:", "L\n", pair1_json, "\nR\n",pair2_json)
-            print(match_vector)
+            # print("FALSE POS:", "L\n", pair1_json, "\nR\n",pair2_json)
+            #print(match_vector)
             false_positives += 1
         guesses += 1
     elif match_guess == -1:
@@ -114,8 +119,8 @@ for line in dataset_fd:
             true_negatives += 1
             correct_guesses += 1
         else:
-            print("FALSE NEG:", "L\n", pair1_json, "R\n", pair2_json)
-            print(match_vector)
+            # print("FALSE NEG:", "L\n", pair1_json, "R\n", pair2_json)
+            #print(match_vector)
             false_negatives += 1
         guesses += 1
     testing_data.append(v)
