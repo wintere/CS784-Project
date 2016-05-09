@@ -81,9 +81,8 @@ class FeatureGenerator:
 
 
         # for log regression
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements, self.big_text_shared_keys_tfidf,
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard, self.conditionmatch, self.big_text_overlap_coeffecient, self.product_segment_jaccard
-
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements, self.big_text_shared_keys_tfidf, self.product_name_overlap_coeffecient
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard, self.conditionmatch, self.big_text_overlap_coeffecient, self.product_segment_jaccard, self.long_descript_key_sim
 
     def impromptu_longd_tfidf(self, l, r):
         p1 = l.get(pld)
@@ -110,6 +109,14 @@ class FeatureGenerator:
         p1_tokens = tokenizeAndFilter(p1)
         p2_tokens = tokenizeAndFilter(p2)
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
+
+
+    def product_name_overlap_coeffecient(self, l, r):
+        p1 = l.get('product name')[0]
+        p2 = r.get('product name')[0]
+        p1_tokens = tokenizeAndFilter(p1)
+        p2_tokens = tokenizeAndFilter(p2)
+        return py_stringmatching.simfunctions.overlap_coefficient(p1_tokens, p2_tokens)
 
     #checked
     def product_name_monge_elkan(self,l, r, lld, rld):
@@ -176,12 +183,30 @@ class FeatureGenerator:
         
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
+    def product_short_description_overlap_coeffecient(self, l, r, lld, rld):
+        p1_tokens = []
+        p2_tokens = []
+        p1 = l.get('product short description')
+        p2 = r.get('product short description')
+        if p1 is None and psd in lld:
+            p1 = lld.get(psd)
+        if p2 is None and psd in rld:
+            p2 = rld.get(psd)
+        if p1 is not None:
+            p1_tokens = tokenizeAndFilter(p1[0])
+        if p2 is not None:
+            p2_tokens = tokenizeAndFilter(p2[0])
+
+        # if this field does not exist in one of the tuples, then this data is inconclusive. return 0.5.
+        if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
+            return 0.5
+
+        return py_stringmatching.simfunctions.overlap_coefficient(p1_tokens, p2_tokens)
+
     #checked
     def total_key_similarity(self, l, r, lld, rld):
         l_keys = list(l.keys())
         r_keys = list(r.keys())
-        l_keys = [x.lower() for x in l_keys]
-        r_keys = [x.lower() for x in r_keys]
         return py_stringmatching.simfunctions.overlap_coefficient(set(l_keys), set(r_keys))
 
 
@@ -189,8 +214,6 @@ class FeatureGenerator:
     def long_descript_key_sim(self, l, r, lld, rld):
         lld_keys = list(lld.keys())
         rld_keys = list(rld.keys())
-        lld_keys = [x.lower() for x in lld_keys]
-        rld_keys = [x.lower() for x in rld_keys]
         return py_stringmatching.simfunctions.overlap_coefficient(lld_keys, rld_keys)
 
     #checked
@@ -246,7 +269,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #checked
@@ -580,7 +603,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def features_jaccard(self, l, r, lld, rld):
