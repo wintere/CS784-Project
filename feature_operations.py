@@ -159,7 +159,7 @@ class FeatureGenerator:
             p1_tokens = cleanTokenize(p1[0])
         if p2 is not None:
             p2_tokens = cleanTokenize(p2[0])
-            
+
         return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens, dampen=True)
 
     #checked
@@ -176,11 +176,11 @@ class FeatureGenerator:
             p1_tokens = tokenizeAndFilter(p1[0])
         if p2 is not None:
             p2_tokens = tokenizeAndFilter(p2[0])
-        
+
         # if this field does not exist in one of the tuples, then this data is inconclusive. return 0.5.
         if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
             return 0.5
-        
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_short_description_overlap_coeffecient(self, l, r, lld, rld):
@@ -250,7 +250,7 @@ class FeatureGenerator:
         p2_tokens.extend(fetchSet(rld, 'product type'))
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #checked
@@ -291,7 +291,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        
+
         return py_stringmatching.simfunctions.monge_elkan(p1_tokens, p2_tokens)
 
     #string distance instead?
@@ -313,7 +313,7 @@ class FeatureGenerator:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
         p1_tokens = [x.lower() for x in p1_tokens]
         p2_tokens = [x.lower() for x in p2_tokens]
-        
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #checked
@@ -549,11 +549,11 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0].lower())
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0].lower())
-            
+
         # if this field does not exist in one of the tuples, then this data is inconclusive. return 0.5.
         if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
             return 0.5
-        
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def width_jaccard(self, l, r, lld, rld):
@@ -564,12 +564,12 @@ class FeatureGenerator:
         if p1 is None and 'width' in lld.keys():
             p1 = [lld.get('width')]
         if p2 is None and 'width' in rld.keys():
-            p2 = [rld.get('width')]     
+            p2 = [rld.get('width')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-            
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def depth_jaccard(self, l, r, lld, rld):
@@ -580,12 +580,12 @@ class FeatureGenerator:
         if p1 is None and 'depth' in lld.keys():
             p1 = [lld.get('depth')]
         if p2 is None and 'depth' in rld.keys():
-            p2 = [rld.get('depth')]     
+            p2 = [rld.get('depth')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-           
+
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_series_jaccard(self, l, r, lld, rld):
@@ -596,7 +596,7 @@ class FeatureGenerator:
         if p1 is None and 'product series' in lld.keys():
             p1 = [lld.get('product series')]
         if p2 is None and 'product series' in rld.keys():
-            p2 = [rld.get('product series')]     
+            p2 = [rld.get('product series')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -614,7 +614,7 @@ class FeatureGenerator:
         if p1 is None and 'features' in lld.keys():
             p1 = [lld.get('features')]
         if p2 is None and 'features' in rld.keys():
-            p2 = [rld.get('features')]     
+            p2 = [rld.get('features')]
         if p1 is not None:
             p1_tokens = cleanTokenize(p1[0])
         if p2 is not None:
@@ -629,7 +629,7 @@ class FeatureGenerator:
         if p1 is None and 'product line' in lld.keys():
             p1 = [lld.get('product line')]
         if p2 is None and 'product line' in rld.keys():
-            p2 = [rld.get('product line')]     
+            p2 = [rld.get('product line')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -644,7 +644,7 @@ class FeatureGenerator:
         if p1 is None and 'screen size' in lld.keys():
             p1 = [lld.get('screen size')]
         if p2 is None and 'screen size' in rld.keys():
-            p2 = [rld.get('screen size')]     
+            p2 = [rld.get('screen size')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -659,7 +659,7 @@ class FeatureGenerator:
         if p1 is None and 'green compliant' in lld.keys():
             p1 = [lld.get('green compliant')]
         if p2 is None and 'green compliant' in rld.keys():
-            p2 = [rld.get('green compliant')]     
+            p2 = [rld.get('green compliant')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -689,7 +689,7 @@ class FeatureGenerator:
         if p1 is None and 'form factor' in lld.keys():
             p1 = [lld.get('form factor')]
         if p2 is None and 'form factor' in rld.keys():
-            p2 = [rld.get('form factor')]     
+            p2 = [rld.get('form factor')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -704,7 +704,7 @@ class FeatureGenerator:
         if p1 is None and 'operating system' in lld.keys():
             p1 = [lld.get('operating system')]
         if p2 is None and 'operating system' in rld.keys():
-            p2 = [rld.get('operating system')]     
+            p2 = [rld.get('operating system')]
         if p1 is not None:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
@@ -726,14 +726,14 @@ class FeatureGenerator:
         if p2 is not None:
             p1_tokens = cleanTokenize(p2[0])
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
-        
+
     def assembly_code_sim(self, l, r, lld, rld):
         p1 = l.get('assembly code')
         p2 = r.get('assembly code')
         if p1 is None and 'assembly code' in lld.keys():
             p1 = [lld.get('assembly code')]
         if p2 is None and 'assembly code' in rld.keys():
-            p2 = [rld.get('assembly code')]     
+            p2 = [rld.get('assembly code')]
         if p1 is None:
             p1 = [""]
         if p2 is None:
@@ -751,7 +751,7 @@ class FeatureGenerator:
         if p1 is None and 'green indicator' in lld.keys():
             p1 = [lld.get('green indicator')]
         if p2 is None and 'green indicator' in rld.keys():
-            p2 = [rld.get('green indicator')]     
+            p2 = [rld.get('green indicator')]
         if p1 is None:
             p1 = [""]
         if p2 is None:
@@ -769,7 +769,7 @@ class FeatureGenerator:
         if p1 is None and 'model' in lld.keys():
             p1 = [lld.get('model')]
         if p2 is None and 'model' in rld.keys():
-            p2 = [rld.get('model')]     
+            p2 = [rld.get('model')]
         if p1 is None:
             p1 = [""]
         if p2 is None:
@@ -788,7 +788,7 @@ class FeatureGenerator:
         if p1 is None and 'product model' in lld.keys():
             p1 = [lld.get('product model')]
         if p2 is None and 'product model' in rld.keys():
-            p2 = [rld.get('product model')]     
+            p2 = [rld.get('product model')]
         if p1 is None:
             p1 = [""]
         if p2 is None:
@@ -807,7 +807,7 @@ class FeatureGenerator:
         if p1 is None and 'processor core' in lld.keys():
             p1 = [lld.get('processor core')]
         if p2 is None and 'processor core' in rld.keys():
-            p2 = [rld.get('processor core')]     
+            p2 = [rld.get('processor core')]
         if p1 is None:
             p1 = [""]
         if p2 is None:
@@ -907,7 +907,7 @@ class FeatureGenerator:
             return (p1[0] == p2[0])
         else:
             return -1
-        
+
 
     def getVectorAttributes(self, allFuncs=False):
         att = []
@@ -976,7 +976,7 @@ class FeatureGenerator:
             vector.append(y)
 
         #numeric checks or simple yes/no checks that don't require or benefit from further processing
-        numeric_checks = ['remanufactured','green indicator', 'sku','recycled', 'speakers', 'number of ports', 'number of screens', 'number of cores', 'cache', 'hdmi','voltage', 'host interface', 'colors', 'shielding', 'network technology', 'maximum memory', 'output voltage', 'page-yield', 'assembly required', 'processor manufacturer', 'coverage percent', 'oem compatible', 'model number', 'product series']
+        numeric_checks = ['remanufactured','green indicator', 'sku','recycled', 'speakers', 'number of ports', 'number of screens', 'cache', 'hdmi','voltage', 'host interface', 'colors', 'shielding', 'network technology', 'maximum memory', 'output voltage', 'page-yield', 'assembly required', 'processor manufacturer', 'coverage percent', 'oem compatible', 'model number', 'product series','storage capacity']
         for key in numeric_checks:
             y = self.genericExtension(l, r, lld, rld, key)
             vector.append(y)
