@@ -57,7 +57,7 @@ training_fd.close()
 print("Finished setting up " + str(training_samples) + " training samples!")
 
 # Set up a decision tree classifier using the data passed in
-clf = ensemble.RandomForestClassifier(n_estimators=37, random_state=26)
+clf = ensemble.RandomForestClassifier(n_estimators=53, random_state=26)
 clf = clf.fit(training_data, labels)
 correct_guesses = 0
 guesses = 0

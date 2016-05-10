@@ -39,7 +39,7 @@ match_pattern = r'\?MATCH|\?MISMATCH'
 
 # there might be a better way to do this than the split library...
 jumbo_pattern =  r'(\?MATCH|\?MISMATCH)|(\?\d+#[\w. -]+\?)|(\d+-\d+#[\w. -]+\?\d+\?)'
-
+pld = 'product long description'
 
 # for each line (pair of tuples) in the file
 count = 0
@@ -52,6 +52,11 @@ a = f.getVectorAttributes(allFuncs=True)
 lines = []
 s = 0
 k = 0
+keys= defaultdict(int)
+left_keys = defaultdict(int)
+left_ldkeys = defaultdict(int)
+right_keys = defaultdict(int)
+right_ldkeys = defaultdict(int)
 for line in fd:
     # split line into 5 parts described above
     seg = re.split(jumbo_pattern, line)
@@ -61,14 +66,34 @@ for line in fd:
     pair2_id = seg[6]
     pair2_json = seg[8]
     match_status = seg[9]
-    lines.append(line)
     pair1_json = pair1_json.lower()
     pair2_json = pair2_json.lower()
-    if ('refurbished' in pair1_json and 'refurbished' not in pair2_json) or ('refurbished' in pair2_json and 'refurbished' not in pair1_json):
-        if (match_status) == "?MATCH":
-            print(pair1_json, '\n', pair2_json, '\n')
-            k+= 1
-        s += 1
+    l = json.loads(pair1_json)
+    r = json.loads(pair2_json)
+    lld, rld = None, None
+    if pld in l.keys():
+        f.parser.reset()
+        f.parser.result = {}
+        f.parser.feed(l[pld][0])
+        lld = f.parser.result
+        for key in list(lld.keys()):
+            keys[key] += 1
+            left_ldkeys[key] += 1
+        l[pld] = [f.ie.text_from_html(l[pld][0])]
+    if pld in r.keys():
+        f.parser.reset()
+        f.parser.result = {}
+        f.parser.feed(r[pld][0])
+        rld = f.parser.result
+        for key in list(rld.keys()):
+            keys[key] += 1
+            right_ldkeys[key] += 1
+        r[pld] = [f.ie.text_from_html(r[pld][0])]
+    tester = 'connector on second end'
+    if rld and lld and (lld.get(tester) or rld.get(tester)):
+        if (rld.get(tester) != lld.get(tester)) and (lld.get(tester) and rld.get(tester)):
+            print(rld.get(tester), "|", lld.get(tester))
+            print(match_status)
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
     # if tra == 15000:
@@ -105,8 +130,11 @@ for line in fd:
     # for i in range(len(v)):
     #     print(a[i], ":", v[i], match_status)
 fd.close()
-print("ERROR:", k/s)
-
-# cv = feature_extraction.text.TfidfVectorizer(encoding='utf-8', decode_error='ignore', tokenizer=cleanTokenize, vocabulary=None)
-# tfidf_d = cv.fit(lds).vocabulary_
-# pickle.dump(tfidf_d, open("tfidf_longd.p", "wb"))
+# tophits = open('tophits_freq', mode='w', encoding='ascii', errors='ignore')
+# c = 0
+# tophits.write('key' + '\t' + 'left' + '\t' + 'lld' + '\t' + 'right' + '\t' + 'rld' )
+# for w in sorted(keys, key=keys.get, reverse=True):
+#     if c < 750:
+#         tophits.write(w + '\t' + str(left_keys[w]) + '\t' + str(left_ldkeys[w]) + '\t' + str(right_keys[w]) + '\t' +  str(right_ldkeys[w]) + '\n')
+#     c += 1
+# tophits.close()

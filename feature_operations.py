@@ -82,7 +82,7 @@ class FeatureGenerator:
 
         # for log regression
         self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements, self.big_text_shared_keys_tfidf, self.product_name_overlap_coeffecient
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard, self.conditionmatch, self.big_text_overlap_coeffecient, self.product_segment_jaccard, self.long_descript_key_sim
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard, self.conditionmatch, self.big_text_overlap_coeffecient, self.product_segment_jaccard, self.long_descript_key_sim, self.country_of_origin
 
     def impromptu_longd_tfidf(self, l, r):
         p1 = l.get(pld)
@@ -883,6 +883,31 @@ class FeatureGenerator:
         else:
             return 1
 
+    def country_of_origin(self, l, r, lld, rld):
+        p1 = l.get('country of origin')
+        p2 = r.get('country of origin')
+        if p1 is None:
+            p1 = [lld.get('country of origin')]
+        if p2 is None:
+            p2 = [rld.get('country of origin')]
+        if p1 and p2:
+            return(p1[0] == p2[0])
+        else:
+            return -1
+
+    #return equality if both
+    def genericExtension(self, l, r, lld, rld, gen):
+        p1 = l.get(gen)
+        p2 = r.get(gen)
+        if p1 is None:
+            p1 = [lld.get(gen)]
+        if p2 is None:
+            p2 = [rld.get(gen)]
+        if p1 and p2:
+            return (p1[0] == p2[0])
+        else:
+            return -1
+        
 
     def getVectorAttributes(self, allFuncs=False):
         att = []
@@ -949,4 +974,11 @@ class FeatureGenerator:
         for func in longd_functions:
             y = func(l, r, lld, rld)
             vector.append(y)
+
+        #numeric checks or simple yes/no checks that don't require or benefit from further processing
+        numeric_checks = ['remanufactured','green indicator', 'sku','recycled', 'speakers', 'number of ports', 'number of screens', 'number of cores', 'cache', 'hdmi','voltage', 'host interface', 'colors', 'shielding', 'network technology', 'maximum memory', 'output voltage', 'page-yield', 'assembly required', 'processor manufacturer', 'coverage percent', 'oem compatible', 'model number', 'product series']
+        for key in numeric_checks:
+            y = self.genericExtension(l, r, lld, rld, key)
+            vector.append(y)
+
         return vector
