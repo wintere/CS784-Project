@@ -10,7 +10,7 @@ import math
 pld = 'product long description'
 psd = 'product short description'
 
-stops = ['-', '.', '\n', '', '&', 'and','this','with','the', 'you', 'to', 'a', 'an', 'or', 'have', 'should', 'more']
+stops = ['-', '.', '\n', '', '&', 'and','this','with','the', 'you', 'to', 'a', 'an', 'or', 'have']
 
 def tokenizeAndFilter(string):
     tokens = []
@@ -81,8 +81,8 @@ class FeatureGenerator:
 
 
         # for log regression
-        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements, self.big_text_shared_keys_tfidf, self.product_name_overlap_coeffecient
-        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.device_type_sim, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_model_levenshtein, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.total_key_similarity, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard, self.conditionmatch, self.big_text_overlap_coeffecient, self.product_segment_jaccard, self.long_descript_key_sim, self.country_of_origin
+        self.all_lr_functions = self.big_text_tfidf, self.big_text_jaccard, self.product_long_description_jaccard, self.product_name_jaccard, self.impromptu_longd_tfidf, self.product_name_tfidf, self.product_long_description_measurements, self.big_text_shared_keys_tfidf, self.product_name_overlap_coeffecient, self.extracted_brand,
+        self.all_longd_functions = self.assembled_product_length_sim, self.assembled_product_width_sim, self.assembly_code_sim, self.brand_and_brand_name_sim, self.color_match, self.depth_jaccard, self.form_factor_jaccard, self.green_compliant_jaccard, self.green_indicator_sim, self.manufacturer_jaccard, self.manufacturer_part_number_jaccard, self.model_levenshtein, self.operating_system_jaccard, self.processor_core_levenshtein, self.product_line_jaccard, self.product_series_jaccard, self.product_type_sim, self.screen_size_jaccard, self.type_jaccard, self.weight_jaccard, self.width_jaccard, self.product_short_description_jaccard, self.product_short_description_tfidf,self.big_text_no_pld_jaccard, self.key_length_difference, self.ld_key_length_difference, self.product_name_monge_elkan,self.product_name_measurements_jaccard, self.conditionmatch, self.big_text_overlap_coeffecient, self.product_segment_jaccard,self.long_descript_key_sim, self.country_of_origin, self.all_units_overlap
 
     def impromptu_longd_tfidf(self, l, r):
         p1 = l.get(pld)
@@ -120,16 +120,8 @@ class FeatureGenerator:
 
     #checked
     def product_name_monge_elkan(self,l, r, lld, rld):
-        p1_tok = []
-        p2_tok = []
-        p1 = l.get('product name')[0].lower()
-        p2 = r.get('product name')[0].lower()
-        p1_tok.extend(tokenizeAndFilter(p1))
-        p2_tok.extend(tokenizeAndFilter(p2))
-        if 'product name' in lld:
-            p1_tok.extend(tokenizeAndFilter(lld['product name'].lower()))
-        if 'product name' in rld:
-            p2_tok.extend(tokenizeAndFilter(rld['product name'].lower()))
+        p1_tok = tokenizeAndFilter(l.get('product name')[0])
+        p2_tok = tokenizeAndFilter(r.get('product name')[0])
         return py_stringmatching.simfunctions.monge_elkan(p1_tok, p2_tok)
 
     def key_length_difference(self, l, r, lld, rld):
@@ -159,8 +151,10 @@ class FeatureGenerator:
             p1_tokens = cleanTokenize(p1[0])
         if p2 is not None:
             p2_tokens = cleanTokenize(p2[0])
-
-        return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens, dampen=True)
+        if p1 and p2:
+            return py_stringmatching.simfunctions.tfidf(p1_tokens, p2_tokens, dampen=True)
+        else:
+            return 0.5
 
     #checked
     def product_short_description_jaccard(self, l, r, lld, rld):
@@ -178,9 +172,8 @@ class FeatureGenerator:
             p2_tokens = tokenizeAndFilter(p2[0])
 
         # if this field does not exist in one of the tuples, then this data is inconclusive. return 0.5.
-        if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
+        if not p1 or not p2:
             return 0.5
-
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def product_short_description_overlap_coeffecient(self, l, r, lld, rld):
@@ -196,18 +189,16 @@ class FeatureGenerator:
             p1_tokens = tokenizeAndFilter(p1[0])
         if p2 is not None:
             p2_tokens = tokenizeAndFilter(p2[0])
-
         # if this field does not exist in one of the tuples, then this data is inconclusive. return 0.5.
-        if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
+        if not p1 or not p2:
             return 0.5
-
         return py_stringmatching.simfunctions.overlap_coefficient(p1_tokens, p2_tokens)
 
     #checked
     def total_key_similarity(self, l, r, lld, rld):
-        l_keys = list(l.keys())
-        r_keys = list(r.keys())
-        return py_stringmatching.simfunctions.overlap_coefficient(set(l_keys), set(r_keys))
+        l_keys = set(l.keys())
+        r_keys = set(r.keys())
+        return py_stringmatching.simfunctions.jaccard(set(l_keys), set(r_keys))
 
 
     #checked
@@ -248,8 +239,6 @@ class FeatureGenerator:
         p1_tokens.extend(fetchSet(lld, 'product type'))
         p2_tokens.extend(fetchSet(r,'product type'))
         p2_tokens.extend(fetchSet(rld, 'product type'))
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
 
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
@@ -267,9 +256,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
-
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #checked
@@ -289,9 +275,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
-
         return py_stringmatching.simfunctions.monge_elkan(p1_tokens, p2_tokens)
 
     #string distance instead?
@@ -311,9 +294,6 @@ class FeatureGenerator:
             p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
             p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
-
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     #checked
@@ -372,8 +352,6 @@ class FeatureGenerator:
             l_color = l_color.union(fetchSet(lld, 'color'))
         if 'color' in rld:
             r_color = r_color.union(fetchSet(rld, 'color'))
-        l_color = set([x.lower() for x in l_color])
-        r_color = set([x.lower() for x in r_color])
         return py_stringmatching.simfunctions.jaccard(l_color, r_color)
 
     def big_text_shared_keys_tfidf(self, l, r):
@@ -400,8 +378,6 @@ class FeatureGenerator:
         for key in p2_keys:
             p2_tokens.extend(cleanTokenize(key))
             p2_tokens.extend(tokenizeAndFilter(r.get(key)[0]))
-        p1_tokens = [x.lower() for x in p1_tokens]
-        p2_tokens = [x.lower() for x in p2_tokens]
         return py_stringmatching.simfunctions.jaccard(p1_tokens, p2_tokens)
 
     def big_text_no_pld_jaccard(self, l, r, lld, rld):
@@ -505,13 +481,33 @@ class FeatureGenerator:
         if p2 is '':
             p2 = self.ie.brand_from_string(r.get('product name')[0])
 
-        #standardize extracted brands
         if p1.upper() in self.ie.syn_dict:
-            p1 = self.ie.syn_dict[p1.upper()]
+            p1 = self.ie.syn_dict[p1.upper()].lower()
         if p2.upper() in self.ie.syn_dict:
-            p2 = self.ie.syn_dict[p2.upper()]
+            p2 = self.ie.syn_dict[p2.upper()].lower()
 
-        return py_stringmatching.simfunctions.jaro(p1.lower(), p2.lower())
+        p1 = self.ie.standardizer(p1)
+        p2 = self.ie.standardizer(p2)
+        return py_stringmatching.simfunctions.jaro(p1, p2)
+
+    def extracted_brand(self, l, r):
+        p1 = self.ie.brand_from_string(l.get('product name')[0])
+        p2 = self.ie.brand_from_string(r.get('product name')[0])
+        if p1 is '' and pld in l:
+            self.ie.brand_from_string(l.get(pld)[0])
+        if p2 is '' and pld in r:
+            self.ie.brand_from_string(r.get(pld)[0])
+        if p1.upper() in self.ie.syn_dict:
+            p1 = self.ie.syn_dict[p1.upper()].lower()
+        if p2.upper() in self.ie.syn_dict:
+            p2 = self.ie.syn_dict[p2.upper()].lower()
+
+        p1 = self.ie.standardizer(p1)
+        p2 = self.ie.standardizer(p2)
+        if p1 and p2:
+            return py_stringmatching.simfunctions.needleman_wunsch(p1, p2)/max(len(p1), len(p2))
+        else:
+            return 0
 
     def limited_warranty_jaccard(self, l, r, lld, rld):
         p1_tokens = []
@@ -546,9 +542,9 @@ class FeatureGenerator:
         if p2 is None and 'weight (approximate)' in rld.keys():
             p2 = [rld.get('weight (approximate)')]
         if p1 is not None:
-            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0].lower())
+            p1_tokens = py_stringmatching.tokenizers.whitespace(p1[0])
         if p2 is not None:
-            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0].lower())
+            p2_tokens = py_stringmatching.tokenizers.whitespace(p2[0])
 
         # if this field does not exist in one of the tuples, then this data is inconclusive. return 0.5.
         if (p1_tokens and not p2_tokens) or (p2_tokens and not p1_tokens):
@@ -781,25 +777,6 @@ class FeatureGenerator:
             return 1
         return 0
 
-    #fixed (remember edit distance is not automatically divided by length of string, hence it can be as large as the length of the string)
-    def product_model_levenshtein(self, l, r, lld, rld):
-        p1 = l.get('product model')
-        p2 = r.get('product model')
-        if p1 is None and 'product model' in lld.keys():
-            p1 = [lld.get('product model')]
-        if p2 is None and 'product model' in rld.keys():
-            p2 = [rld.get('product model')]
-        if p1 is None:
-            p1 = [""]
-        if p2 is None:
-            p2 = [""]
-        y = max(len(p1),len(p2))
-        if y > 0:
-            return py_stringmatching.simfunctions.levenshtein(p1[0].lower(), p2[0].lower())/y
-        if p1 != "" or p2 != "":
-            return 0.5
-        return 0
-
     # this only appears in 27 tuples it's probably not actually useful
     def processor_core_levenshtein(self, l, r, lld, rld):
         p1 = l.get('processor core')
@@ -865,6 +842,25 @@ class FeatureGenerator:
             jaccard_value = 0.5
         return jaccard_value
 
+    def all_units_overlap(self, l, r, lld, rld):
+        p1_tok = []
+        p2_tok = []
+        for key in l:
+            p1_tok.extend(cleanTokenize(l[key][0]))
+        for key in lld:
+            p1_tok.extend(cleanTokenize(lld[key]))
+        for key in r:
+            p2_tok.extend(cleanTokenize(r[key][0]))
+        for key in rld:
+            p2_tok.extend(cleanTokenize(rld[key]))
+        p1_units = set(self.ie.unitsFromString(p1_tok))
+        p2_units = set(self.ie.unitsFromString(p2_tok))
+        jaccard_value = py_stringmatching.simfunctions.jaccard(p1_units, p2_units)
+        # if only one tuple returned valid units, return 0.5 (since this is inconclusive)
+        if (p1_units and not p2_units) or (p2_units and not p1_units):
+            jaccard_value = 0.5
+        return jaccard_value
+
     def conditionmatch(self, l, r, lld, rld):
         p1 = set()
         p2 = set()
@@ -873,10 +869,10 @@ class FeatureGenerator:
         p1 = p1.union(fetchSet(l, c), fetchSet(lld, c), fetchSet(l, pc), fetchSet(lld, pc))
         p2 = p2.union(fetchSet(r, c), fetchSet(rld, c), fetchSet(r, pc), fetchSet(rld, pc))
         if p1 is None:
-            if pld in p1 and ('refurbished' in p1[pld][0] or 'refurbished' in (p1['product name'][0]).lower()):
+            if pld in p1 and ('refurbished' in p1[pld][0] or 'refurbished' in p1['product name'][0]):
                 p1 = set('refurbished')
         if p2 is None:
-            if pld in p2 and ('refurbished' in p2[pld][0] or 'refurbished' in (p2['product name'][0]).lower()):
+            if pld in p2 and ('refurbished' in p2[pld][0] or 'refurbished' in p2['product name'][0]):
                 p2 = set('refurbished')
         if p1 != p2:
             return 0
@@ -976,7 +972,7 @@ class FeatureGenerator:
             vector.append(y)
 
         #numeric checks or simple yes/no checks that don't require or benefit from further processing
-        numeric_checks = ['remanufactured','green indicator', 'sku','recycled', 'speakers', 'number of ports', 'number of screens', 'cache', 'hdmi','voltage', 'host interface', 'colors', 'shielding', 'network technology', 'maximum memory', 'output voltage', 'page-yield', 'assembly required', 'processor manufacturer', 'coverage percent', 'oem compatible', 'model number', 'product series','storage capacity']
+        numeric_checks = ['remanufactured','green indicator', 'sku','recycled', 'speakers', 'number of ports', 'number of screens', 'cache', 'hdmi','host interface', 'shielding', 'network technology', 'maximum memory', 'output voltage', 'page-yield', 'assembly required', 'processor manufacturer', 'coverage percent', 'oem compatible', 'model number','storage capacity','green compliant','colors','ram', 'product model']
         for key in numeric_checks:
             y = self.genericExtension(l, r, lld, rld, key)
             vector.append(y)

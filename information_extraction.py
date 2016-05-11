@@ -60,28 +60,27 @@ class InformationExtractor:
         except UserWarning:
             return description.lower()
 
+    def standardizer(self,string):
+        brand_dict = {'cables to go': 'c2g', 'startech.com': 'startech', 'pny technologies': 'pny', 'everki usa inc':'everki','rubbermaid home': 'rubbermaid', 'tripp-lite':'tripp lite', 'hewlett packard':'hp', 'buffalo technology':'buffalo', 'officemate international corp':'officemate', 'phillips monitors':'phillips', 'pyle audio':'pyle'}
+        for key, value in brand_dict.items():
+            if key in string:
+                string = string.replace(key, value)
+        return string
+
     # a cheap haaaack
     def brand_adjuster(self, d, ld=False):
         if ld:
             for entry in ['brand', 'product name', 'manufacturer', 'product short description', 'product long description', 'brand name']:
                 if entry in d:
-                    cur = d.get(entry).lower()
-                    cur = cur.replace('cables to go', 'c2g')
-                    cur = cur.replace('startech.com', 'startech')
-                    cur = cur.replace('pny technologies', 'pny')
-                    cur = cur.replace('everki usa inc', 'everki')
-                    cur = cur.replace('rubbermaid home', 'rubbermaid')
-                    d[entry] = cur
+                    val = d[entry]
+                    val = self.standardizer(val)
+                    d[entry] = val
         else:
             for entry in ['brand', 'product name', 'manufacturer', 'product short description', 'product long description', 'brand name']:
                 if entry in d:
-                    cur = d.get(entry)[0].lower()
-                    cur = cur.replace('cables to go', 'c2g')
-                    cur = cur.replace('startech.com', 'startech')
-                    cur = cur.replace('pny technologies', 'pny')
-                    cur = cur.replace('everki usa inc', 'everki')
-                    cur = cur.replace('rubbermaid home', 'rubbermaid')
-                    d[entry] = [cur]
+                    val = d[entry][0]
+                    val = self.standardizer(val)
+                    d[entry] = [val]
         return d
 
     def color_from_name(self, product_name):
@@ -146,7 +145,7 @@ class InformationExtractor:
 
     #moved from feature_operations for better modularity
     def unitsFromString(self, tokens):
-        measurement_units = ['khz', 'mhz', 'ghz', 'watt', 'nm', 'um', 'mm', 'cm', 'm', 'km', 'ft', 'in', 's', 'ms', 'mb', 'gb', 'tb', 'gb/s', 'mb/s', 'mbps', 'awg', 'a', 'w', 'g', 'lb', 'dba', 'cfm', 'rpm', 'amp', 'mah', 'watts', 'vac']
+        measurement_units = ['khz', 'mhz', 'ghz', 'watt', 'nm', 'um', 'mm', 'cm', 'm', 'km', 'ft', 'in', 's', 'ms', 'mb', 'gb', 'tb', 'gb/s', 'mb/s', 'mbps', 'awg', 'a', 'w', 'g', 'lb', 'dba', 'cfm', 'rpm', 'amp', 'mah', 'watts', 'vac','nits','volts','inches','pounds','ounces','lbs']
         units = []
         for index in range(0, len(tokens)):
             token = tokens[index].lower()

@@ -70,30 +70,31 @@ for line in fd:
     pair2_json = pair2_json.lower()
     l = json.loads(pair1_json)
     r = json.loads(pair2_json)
-    lld, rld = None, None
-    if pld in l.keys():
-        f.parser.reset()
-        f.parser.result = {}
-        f.parser.feed(l[pld][0])
-        lld = f.parser.result
-        for key in list(lld.keys()):
-            keys[key] += 1
-            left_ldkeys[key] += 1
-        l[pld] = [f.ie.text_from_html(l[pld][0])]
-    if pld in r.keys():
-        f.parser.reset()
-        f.parser.result = {}
-        f.parser.feed(r[pld][0])
-        rld = f.parser.result
-        for key in list(rld.keys()):
-            keys[key] += 1
-            right_ldkeys[key] += 1
-        r[pld] = [f.ie.text_from_html(r[pld][0])]
-    tester = 'connector on second end'
-    if rld and lld and (lld.get(tester) or rld.get(tester)):
-        if (rld.get(tester) != lld.get(tester)) and (lld.get(tester) and rld.get(tester)):
-            print(rld.get(tester), "|", lld.get(tester))
-            print(match_status)
+    # lld, rld = {}, {}
+    # if pld in l.keys():
+    #     f.parser.reset()
+    #     f.parser.result = {}
+    #     f.parser.feed(l[pld][0])
+    #     lld = f.parser.result
+    #     for key in list(lld.keys()):
+    #         keys[key] += 1
+    #         left_ldkeys[key] += 1
+    #     l[pld] = [f.ie.text_from_html(l[pld][0])]
+    # if pld in r.keys():
+    #     f.parser.reset()
+    #     f.parser.result = {}
+    #     f.parser.feed(r[pld][0])
+    #     rld = f.parser.result
+    #     for key in list(rld.keys()):
+    #         keys[key] += 1
+    #         right_ldkeys[key] += 1
+    #     r[pld] = [f.ie.text_from_html(r[pld][0])]
+    # tester = 'form factor'
+    # if rld and lld and (lld.get(tester) or rld.get(tester)):
+    #     if (rld.get(tester) != lld.get(tester)) and (lld.get(tester) and rld.get(tester)):
+    #         print(rld.get(tester), "|", lld.get(tester))
+    v = f.getVector(l, r, allFuncs=True)
+    print(match_status)
     # r = pair_1's data, s = pair_2's data
     # json loads returns a dictionary
     # if tra == 15000:

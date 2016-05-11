@@ -93,14 +93,16 @@ if __name__ == '__main__':
             train_lines.append(line)
     train_file.close()
 
+
     #process safe (ok sure)
-    with Pool(processes=11) as pool:
+    with Pool(processes=4) as pool:
        featureVecs = pool.map(processTraining, train_lines)
     #unzip computed tuples into vectors and labels
     trainingData, labels = zip(*featureVecs)
     print("Finished setting up", len(featureVecs),"training samples!")
     cs = time.time()
-    clf = ensemble.RandomForestClassifier(n_estimators=55, random_state=26)
+    features = len(featureVecs[0][0])
+    clf = ensemble.RandomForestClassifier(n_estimators=features-10, random_state=26)
     clf = clf.fit(trainingData, labels)
     cf = time.time()
     print("Classifier set up in", (cf-cs)/60,"seconds.")
@@ -109,7 +111,7 @@ if __name__ == '__main__':
         test_lines.append(line)
     test_file.close()
 
-    with Pool(processes=11) as pool:
+    with Pool(processes=4) as pool:
         featureVecs = pool.map(processTesting, test_lines)
 
     for match in featureVecs:
